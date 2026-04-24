@@ -24,3 +24,23 @@ export async function fetchPlatforms(page = 1, pageSize = 20): Promise<RawgPlatf
   if (!res.ok) throw new Error(`RAWG error: ${res.status}`)
   return res.json()
 }
+
+// Fetches every page from RAWG — use only during sync, not on each request
+export async function fetchAllPlatforms(): Promise<RawgPlatform[]> {
+  const all: RawgPlatform[] = []
+  let page = 1
+
+  while (true) {
+    const res = await fetch(
+      `${RAWG_BASE}/platforms?key=${API_KEY}&page=${page}&page_size=40`,
+      { cache: 'no-store' }
+    )
+    if (!res.ok) throw new Error(`RAWG error ${res.status} on page ${page}`)
+    const data: RawgPlatformsResponse = await res.json()
+    all.push(...data.results)
+    if (!data.next) break
+    page++
+  }
+
+  return all
+}

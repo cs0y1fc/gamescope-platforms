@@ -1,20 +1,20 @@
 'use client'
 
-import { RawgPlatform } from '@/lib/rawg'
+import { Platform } from '@/lib/types'
 
 type Props = {
-  platform: RawgPlatform
+  platform: Platform
   isFavorite: boolean
-  onToggleFavorite: (platform: RawgPlatform) => void
+  onToggleFavorite: (platform: Platform) => void
 }
 
 export default function PlatformCard({ platform, isFavorite, onToggleFavorite }: Props) {
   return (
     <div className="relative rounded-xl overflow-hidden border border-gray-800 bg-gray-900 hover:border-gray-600 transition-colors group">
-      {platform.image_background && (
+      {platform.image_url && (
         <div
           className="h-32 bg-cover bg-center opacity-40 group-hover:opacity-60 transition-opacity"
-          style={{ backgroundImage: `url(${platform.image_background})` }}
+          style={{ backgroundImage: `url(${platform.image_url})` }}
         />
       )}
       <div className="p-4">
@@ -41,6 +41,9 @@ export default function PlatformCard({ platform, isFavorite, onToggleFavorite }:
           <p className="text-xs text-gray-600 mt-2">
             {platform.year_start ?? '?'} — {platform.year_end ?? 'presente'}
           </p>
+        )}
+        {platform.source === 'database' && (
+          <span className="mt-2 inline-block text-[10px] text-gray-700">cached</span>
         )}
       </div>
     </div>

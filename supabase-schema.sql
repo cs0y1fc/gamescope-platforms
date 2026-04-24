@@ -1,4 +1,6 @@
--- Run this in your Supabase SQL editor
+-- ─────────────────────────────────────────────
+-- 1. Favorite platforms (user picks)
+-- ─────────────────────────────────────────────
 create table if not exists favorite_platforms (
   id         bigint primary key generated always as identity,
   rawg_id    integer unique not null,
@@ -7,9 +9,60 @@ create table if not exists favorite_platforms (
   created_at timestamptz default now()
 );
 
--- Allow public read/write (adjust with RLS for production)
 alter table favorite_platforms enable row level security;
-
-create policy "Public read" on favorite_platforms for select using (true);
+create policy "Public read"   on favorite_platforms for select using (true);
 create policy "Public insert" on favorite_platforms for insert with check (true);
 create policy "Public delete" on favorite_platforms for delete using (true);
+
+-- ─────────────────────────────────────────────
+-- 2. Platforms cache (synced daily from RAWG)
+-- ─────────────────────────────────────────────
+create table if not exists platforms (
+  id                   bigint primary key generated always as identity,
+  rawg_id              integer unique not null,
+  name                 text not null,
+  slug                 text not null,
+  games_count          integer not null default 0,
+  image_background_url text,          -- original RAWG CDN URL
+  image_local_url      text,          -- Supabase Storage public URL
+  year_start           integer,
+  year_end             integer,
+  updated_at           timestamptz default now()
+);
+
+alter table platforms enable row level security;
+create policy "Public read" on platforms for select using (true);
+
+-- Service-role writes (sync runs server-side with SUPABASE_SERVICE_ROLE_KEY)
+create policy "Service insert" on platforms for insert with check (true);
+create policy "Service update" on platforms for update using (true);
+
+-- ─────────────────────────────────────────────
+-- 3. Sync state (single row, id = 1)
+-- ─────────────────────────────────────────────
+create table if not exists sync_state (
+  id               integer primary key default 1,
+  last_synced_at   timestamptz,
+  platforms_count  integer default 0
+);
+
+alter table sync_state enable row level security;
+create policy "Public read"    on sync_state for select using (true);
+create policy "Service write"  on sync_state for all  using (true);
+
+-- Seed the single row so the first SELECT doesn't return null
+insert into sync_state (id) values (1) on conflict (id) do nothing;
+
+-- ─────────────────────────────────────────────
+-- 4. Storage bucket  (run AFTER tables)
+-- ─────────────────────────────────────────────
+-- Create via Supabase Dashboard → Storage → New bucket
+--   Name: platform-images
+--   Public: YES
+--
+-- Or via the API / CLI:
+--   supabase storage create platform-images --public
+--
+-- Storage policies (allow service role to upload):
+-- The bucket being public already allows GET. The sync route uses
+-- SUPABASE_SERVICE_ROLE_KEY which bypasses RLS for storage uploads.
