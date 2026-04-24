@@ -36,7 +36,7 @@ export default function PlatformsGrid() {
       const favData = await favoritesRes.json()
       if (Array.isArray(favData)) {
         setFavorites(favData)
-      } else {
+      } else if (favoritesRes.status === 503 || favData?.error) {
         setSupabaseReady(false)
       }
     } catch (e: unknown) {
