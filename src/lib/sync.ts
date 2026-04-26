@@ -1,9 +1,11 @@
-import { getSupabase, getSupabaseAdmin, DbPlatform, SyncState } from './supabase'
+import fs from 'fs'
+import path from 'path'
+import { getSupabase, DbPlatform, SyncState } from './supabase'
 import { fetchAllPlatforms } from './rawg'
 import { Platform } from './types'
 
-const BUCKET = 'platform-images'
 const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000
+const IMAGES_DIR = path.join(process.cwd(), 'public', 'platforms')
 
 export type SyncStatus = {
   configured: boolean
@@ -13,7 +15,7 @@ export type SyncStatus = {
 }
 
 export type SyncResult =
-  | { ok: true; synced: true; count: number }
+  | { ok: true; synced: true; count: number; imagesDownloaded: number }
   | { ok: true; synced: false; skippedReason: 'fresh' }
   | { ok: false; error: string }
 
@@ -38,48 +40,35 @@ export async function getSyncStatus(): Promise<SyncStatus> {
   }
 }
 
-async function ensureBucket(sb: ReturnType<typeof getSupabaseAdmin>) {
-  if (!sb) return
-  try {
-    await sb.storage.createBucket(BUCKET, { public: true })
-  } catch {
-    // bucket already exists — safe to ignore
-  }
-}
+// Downloads a RAWG image to public/platforms/{slug}.jpg.
+// Returns the local URL path on success, null if the write is not possible
+// (e.g. read-only filesystem in production) or the download fails.
+async function saveImageLocally(slug: string, rawgUrl: string): Promise<string | null> {
+  const filename = `${slug}.jpg`
+  const filePath = path.join(IMAGES_DIR, filename)
 
-async function uploadImage(
-  sb: ReturnType<typeof getSupabaseAdmin>,
-  slug: string,
-  rawgUrl: string,
-): Promise<string | null> {
-  if (!sb) return null
+  // Skip download if the file already exists on disk
+  if (fs.existsSync(filePath)) return `/platforms/${filename}`
+
   try {
+    await fs.promises.mkdir(IMAGES_DIR, { recursive: true })
     const res = await fetch(rawgUrl)
     if (!res.ok) return null
     const buffer = Buffer.from(await res.arrayBuffer())
-
-    await sb.storage.from(BUCKET).upload(`${slug}.jpg`, buffer, {
-      contentType: 'image/jpeg',
-      upsert: true,
-    })
-
-    const { data } = sb.storage.from(BUCKET).getPublicUrl(`${slug}.jpg`)
-    return data.publicUrl
+    await fs.promises.writeFile(filePath, buffer)
+    return `/platforms/${filename}`
   } catch {
+    // Filesystem not writable (e.g. Vercel serverless) — fall back gracefully
     return null
   }
 }
 
 export async function runSync(): Promise<SyncResult> {
   const sb = getSupabase()
-  const sbAdmin = getSupabaseAdmin()
-
   if (!sb) return { ok: false, error: 'Supabase not configured' }
 
   const status = await getSyncStatus()
   if (!status.needsSync) return { ok: true, synced: false, skippedReason: 'fresh' }
-
-  await ensureBucket(sbAdmin)
 
   let platforms: Awaited<ReturnType<typeof fetchAllPlatforms>>
   try {
@@ -88,10 +77,15 @@ export async function runSync(): Promise<SyncResult> {
     return { ok: false, error: e instanceof Error ? e.message : 'RAWG fetch failed' }
   }
 
+  let imagesDownloaded = 0
+
   for (const p of platforms) {
-    const imageLocalUrl = p.image_background
-      ? await uploadImage(sbAdmin, p.slug, p.image_background)
-      : null
+    let imageLocalUrl: string | null = null
+
+    if (p.image_background) {
+      imageLocalUrl = await saveImageLocally(p.slug, p.image_background)
+      if (imageLocalUrl) imagesDownloaded++
+    }
 
     await sb.from('platforms').upsert(
       {
@@ -115,10 +109,9 @@ export async function runSync(): Promise<SyncResult> {
     platforms_count: platforms.length,
   })
 
-  return { ok: true, synced: true, count: platforms.length }
+  return { ok: true, synced: true, count: platforms.length, imagesDownloaded }
 }
 
-// Normalise a DB row to the shared Platform shape used by the frontend
 export function dbPlatformToUnified(p: DbPlatform): Platform {
   return {
     id: p.rawg_id,

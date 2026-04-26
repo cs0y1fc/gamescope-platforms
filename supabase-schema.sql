@@ -54,15 +54,9 @@ create policy "Service write"  on sync_state for all  using (true);
 insert into sync_state (id) values (1) on conflict (id) do nothing;
 
 -- ─────────────────────────────────────────────
--- 4. Storage bucket  (run AFTER tables)
+-- Note on images
 -- ─────────────────────────────────────────────
--- Create via Supabase Dashboard → Storage → New bucket
---   Name: platform-images
---   Public: YES
---
--- Or via the API / CLI:
---   supabase storage create platform-images --public
---
--- Storage policies (allow service role to upload):
--- The bucket being public already allows GET. The sync route uses
--- SUPABASE_SERVICE_ROLE_KEY which bypasses RLS for storage uploads.
+-- Images are stored locally in public/platforms/{slug}.jpg on the machine
+-- that runs the sync. The column image_local_url holds the relative URL
+-- (/platforms/{slug}.jpg) that Next.js serves as a static asset.
+-- No Supabase Storage bucket is needed.

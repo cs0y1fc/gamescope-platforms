@@ -15,7 +15,7 @@ export type DbPlatform = {
   slug: string
   games_count: number
   image_background_url: string | null
-  image_local_url: string | null
+  image_local_url: string | null   // relative path served by Next.js, e.g. /platforms/pc.jpg
   year_start: number | null
   year_end: number | null
   updated_at: string
@@ -28,7 +28,6 @@ export type SyncState = {
 }
 
 let _client: SupabaseClient | null = null
-let _admin: SupabaseClient | null = null
 
 export function getSupabase(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -36,15 +35,4 @@ export function getSupabase(): SupabaseClient | null {
   if (!url || !key) return null
   if (!_client) _client = createClient(url, key)
   return _client
-}
-
-// Service-role client for server-side storage writes (never exposed to browser)
-export function getSupabaseAdmin(): SupabaseClient | null {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key) return getSupabase()
-  if (!_admin) _admin = createClient(url, key, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-  return _admin
 }
