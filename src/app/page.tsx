@@ -1,5 +1,5 @@
-import PlatformsGrid from '@/components/PlatformsGrid'
+import GamesGrid from '@/components/GamesGrid'
 
 export default function Home() {
-  return <PlatformsGrid />
+  return <GamesGrid />
 }

@@ -1,0 +1,70 @@
+'use client'
+
+import Image from 'next/image'
+import { Game } from '@/lib/types'
+
+export default function GameCard({ game }: { game: Game }) {
+  const releaseYear = game.released ? new Date(game.released).getFullYear() : null
+
+  return (
+    <div className="rounded-xl border border-gray-800 bg-gray-900 overflow-hidden hover:border-gray-600 transition-colors group">
+      <div className="relative h-40 bg-gray-800">
+        {game.background_image ? (
+          <Image
+            src={game.background_image}
+            alt={game.name}
+            fill
+            className="object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-gray-700 text-sm">
+            Sin imagen
+          </div>
+        )}
+        {game.metacritic && (
+          <span
+            className={`absolute top-2 right-2 text-xs font-bold px-2 py-0.5 rounded ${
+              game.metacritic >= 75
+                ? 'bg-green-500/90 text-white'
+                : game.metacritic >= 50
+                ? 'bg-yellow-500/90 text-black'
+                : 'bg-red-500/90 text-white'
+            }`}
+          >
+            {game.metacritic}
+          </span>
+        )}
+      </div>
+
+      <div className="p-3">
+        <h3 className="text-white font-semibold text-sm leading-tight line-clamp-2 mb-2">
+          {game.name}
+        </h3>
+
+        <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
+          <span>{releaseYear ?? '—'}</span>
+          {game.rating > 0 && (
+            <span className="flex items-center gap-1">
+              <span className="text-yellow-400">★</span>
+              {game.rating.toFixed(1)}
+            </span>
+          )}
+        </div>
+
+        {game.genres.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {game.genres.slice(0, 3).map((g) => (
+              <span
+                key={g.id}
+                className="text-xs bg-gray-800 text-gray-400 rounded px-1.5 py-0.5"
+              >
+                {g.name}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
