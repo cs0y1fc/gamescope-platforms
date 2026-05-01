@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Game, Genre, Platform } from '@/lib/types'
 import GameCard from './GameCard'
+import AuthModal from './AuthModal'
+import { createClient } from '@/lib/supabase-browser'
 
 const PAGE_SIZE = 20
 const CURRENT_YEAR = new Date().getFullYear()
@@ -15,6 +17,8 @@ const ORDERING_OPTIONS = [
   { value: 'name', label: 'Nombre A–Z' },
   { value: '-added', label: 'Más populares' },
 ]
+
+type LikeRow = { rawg_id: number; game_name: string }
 
 export default function GamesGrid() {
   const [games, setGames] = useState<Game[]>([])
@@ -30,7 +34,34 @@ export default function GamesGrid() {
   const [ordering, setOrdering] = useState('-rating')
   const [page, setPage] = useState(1)
 
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [showAuth, setShowAuth] = useState(false)
+  const [likes, setLikes] = useState<LikeRow[]>([])
+
+  const likedIds = new Set(likes.map((l) => l.rawg_id))
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+  const sb = createClient()
+
+  // Auth state on mount
+  useEffect(() => {
+    sb.auth.getUser().then(({ data }) => {
+      setUserEmail(data.user?.email ?? null)
+    })
+    const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
+      setUserEmail(session?.user?.email ?? null)
+      if (!session) setLikes([])
+    })
+    return () => subscription.unsubscribe()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Load likes when logged in
+  useEffect(() => {
+    if (!userEmail) { setLikes([]); return }
+    fetch('/api/likes').then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setLikes(data)
+    })
+  }, [userEmail])
 
   const loadGames = useCallback(async () => {
     setLoading(true)
@@ -47,23 +78,13 @@ export default function GamesGrid() {
 
       const mapped: Game[] = (data.results ?? []).map(
         (g: {
-          id: number
-          slug: string
-          name: string
-          released: string | null
-          background_image: string | null
-          rating: number
-          metacritic: number | null
+          id: number; slug: string; name: string; released: string | null
+          background_image: string | null; rating: number; metacritic: number | null
           genres: Genre[]
           platforms: Array<{ platform: { id: number; name: string; slug: string } }>
         }) => ({
-          id: g.id,
-          slug: g.slug,
-          name: g.name,
-          released: g.released,
-          background_image: g.background_image,
-          rating: g.rating,
-          metacritic: g.metacritic,
+          id: g.id, slug: g.slug, name: g.name, released: g.released,
+          background_image: g.background_image, rating: g.rating, metacritic: g.metacritic,
           genres: g.genres,
           platforms: (g.platforms ?? []).map((p) => p.platform),
         }),
@@ -97,16 +118,75 @@ export default function GamesGrid() {
     setPage(1)
   }
 
+  const handleToggleLike = async (game: Game) => {
+    if (likedIds.has(game.id)) {
+      await fetch(`/api/likes?rawg_id=${game.id}`, { method: 'DELETE' })
+      setLikes((prev) => prev.filter((l) => l.rawg_id !== game.id))
+    } else {
+      const res = await fetch('/api/likes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rawg_id: game.id, game_name: game.name }),
+      })
+      if (res.ok) {
+        const row = await res.json()
+        setLikes((prev) => [{ rawg_id: row.rawg_id, game_name: row.game_name }, ...prev])
+      }
+    }
+  }
+
+  const handleSignOut = async () => {
+    await sb.auth.signOut()
+    setUserEmail(null)
+    setLikes([])
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 font-[family-name:var(--font-geist-sans)]">
+      {showAuth && (
+        <AuthModal
+          onClose={() => setShowAuth(false)}
+          onAuth={(email) => { setUserEmail(email); setShowAuth(false) }}
+        />
+      )}
+
       <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
-          <div className="shrink-0">
-            <h1 className="text-xl font-bold text-white">GameScope</h1>
-            <p className="text-xs text-gray-500">Catálogo de videojuegos</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <div className="shrink-0">
+              <h1 className="text-xl font-bold text-white">GameScope</h1>
+              <p className="text-xs text-gray-500">Catálogo de videojuegos</p>
+            </div>
+            {/* Auth */}
+            <div className="flex items-center gap-2">
+              {userEmail ? (
+                <>
+                  <span className="text-xs text-gray-400 hidden sm:block">{userEmail}</span>
+                  {likes.length > 0 && (
+                    <span className="text-xs bg-red-500/10 text-red-400 border border-red-500/20 rounded-full px-2 py-0.5">
+                      ♥ {likes.length}
+                    </span>
+                  )}
+                  <button
+                    onClick={handleSignOut}
+                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors px-2 py-1 rounded border border-gray-700 hover:border-gray-500"
+                  >
+                    Salir
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setShowAuth(true)}
+                  className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  Iniciar sesión
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 justify-end">
+          {/* Filters */}
+          <div className="flex flex-wrap gap-2">
             <select
               value={platform}
               onChange={applyFilter(setPlatform)}
@@ -114,9 +194,7 @@ export default function GamesGrid() {
             >
               <option value="">Todas las plataformas</option>
               {platforms.map((p) => (
-                <option key={p.id} value={String(p.id)}>
-                  {p.name}
-                </option>
+                <option key={p.id} value={String(p.id)}>{p.name}</option>
               ))}
             </select>
 
@@ -127,9 +205,7 @@ export default function GamesGrid() {
             >
               <option value="">Todos los géneros</option>
               {genres.map((g) => (
-                <option key={g.id} value={String(g.id)}>
-                  {g.name}
-                </option>
+                <option key={g.id} value={String(g.id)}>{g.name}</option>
               ))}
             </select>
 
@@ -140,9 +216,7 @@ export default function GamesGrid() {
             >
               <option value="">Todos los años</option>
               {YEARS.map((y) => (
-                <option key={y} value={String(y)}>
-                  {y}
-                </option>
+                <option key={y} value={String(y)}>{y}</option>
               ))}
             </select>
 
@@ -152,9 +226,7 @@ export default function GamesGrid() {
               className="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500"
             >
               {ORDERING_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
+                <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
           </div>
@@ -198,7 +270,14 @@ export default function GamesGrid() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {games.map((g) => (
-              <GameCard key={g.id} game={g} />
+              <GameCard
+                key={g.id}
+                game={g}
+                isLiked={likedIds.has(g.id)}
+                loggedIn={!!userEmail}
+                onToggleLike={handleToggleLike}
+                onNeedAuth={() => setShowAuth(true)}
+              />
             ))}
           </div>
         )}
@@ -214,11 +293,7 @@ export default function GamesGrid() {
             </button>
 
             {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
-              const p = page <= 4
-                ? i + 1
-                : page >= totalPages - 3
-                ? totalPages - 6 + i
-                : page - 3 + i
+              const p = page <= 4 ? i + 1 : page >= totalPages - 3 ? totalPages - 6 + i : page - 3 + i
               if (p < 1 || p > totalPages) return null
               return (
                 <button

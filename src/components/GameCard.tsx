@@ -3,8 +3,22 @@
 import Image from 'next/image'
 import { Game } from '@/lib/types'
 
-export default function GameCard({ game }: { game: Game }) {
+type Props = {
+  game: Game
+  isLiked: boolean
+  loggedIn: boolean
+  onToggleLike: (game: Game) => void
+  onNeedAuth: () => void
+}
+
+export default function GameCard({ game, isLiked, loggedIn, onToggleLike, onNeedAuth }: Props) {
   const releaseYear = game.released ? new Date(game.released).getFullYear() : null
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (!loggedIn) { onNeedAuth(); return }
+    onToggleLike(game)
+  }
 
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900 overflow-hidden hover:border-gray-600 transition-colors group">
@@ -22,6 +36,19 @@ export default function GameCard({ game }: { game: Game }) {
             Sin imagen
           </div>
         )}
+
+        <button
+          onClick={handleLike}
+          title={loggedIn ? (isLiked ? 'Quitar like' : 'Dar like') : 'Inicia sesión para dar likes'}
+          className={`absolute top-2 left-2 w-7 h-7 flex items-center justify-center rounded-full transition-all
+            ${isLiked
+              ? 'bg-red-500 text-white'
+              : 'bg-black/50 text-gray-400 hover:bg-black/70 hover:text-red-400'
+            }`}
+        >
+          {isLiked ? '♥' : '♡'}
+        </button>
+
         {game.metacritic && (
           <span
             className={`absolute top-2 right-2 text-xs font-bold px-2 py-0.5 rounded ${
