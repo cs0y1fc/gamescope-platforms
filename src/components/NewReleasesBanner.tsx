@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
 import { RawgGame } from '@/lib/rawg'
 
-function formatDate(dateStr: string | null) {
+function formatDate(dateStr: string | null): string | null {
   if (!dateStr) return null
   const d = new Date(dateStr)
   return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
@@ -15,30 +15,32 @@ export default function NewReleasesBanner() {
   const [loading, setLoading] = useState(true)
   const [activeIndex, setActiveIndex] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const cardWidthRef = useRef<number>(0)
 
   useEffect(() => {
-    fetch('/api/new-releases')
+    if (!scrollRef.current || games.length === 0) return
+    const firstCard = scrollRef.current.querySelector('article') as HTMLElement | null
+    if (firstCard) cardWidthRef.current = firstCard.offsetWidth + 12
+  }, [games])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetch('/api/new-releases', { signal: controller.signal })
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setGames(data) })
+      .catch(err => { if (err.name !== 'AbortError') console.error(err) })
       .finally(() => setLoading(false))
+    return () => controller.abort()
   }, [])
 
   const handleScroll = () => {
-    if (!scrollRef.current) return
-    const el = scrollRef.current
-    const firstCard = el.querySelector('article') as HTMLElement | null
-    if (!firstCard) return
-    const cardWidth = firstCard.offsetWidth + 12 // gap-3 = 12px
-    setActiveIndex(Math.round(el.scrollLeft / cardWidth))
+    if (!scrollRef.current || cardWidthRef.current === 0) return
+    setActiveIndex(Math.round(scrollRef.current.scrollLeft / cardWidthRef.current))
   }
 
   const scrollToIndex = (i: number) => {
-    if (!scrollRef.current) return
-    const el = scrollRef.current
-    const firstCard = el.querySelector('article') as HTMLElement | null
-    if (!firstCard) return
-    const cardWidth = firstCard.offsetWidth + 12
-    el.scrollTo({ left: i * cardWidth, behavior: 'smooth' })
+    if (!scrollRef.current || cardWidthRef.current === 0) return
+    scrollRef.current.scrollTo({ left: i * cardWidthRef.current, behavior: 'smooth' })
     setActiveIndex(i)
   }
 
@@ -133,9 +135,9 @@ export default function NewReleasesBanner() {
       {/* Dots indicator — only on mobile */}
       {!loading && games.length > 1 && (
         <div className="flex justify-center gap-1.5 mt-3 sm:hidden">
-          {games.map((_, i) => (
+          {games.map((game, i) => (
             <button
-              key={i}
+              key={game.id}
               onClick={() => scrollToIndex(i)}
               aria-label={`Anar a la targeta ${i + 1}`}
               className={`rounded-full h-1.5 transition-all duration-200 ${
