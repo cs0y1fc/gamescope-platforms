@@ -46,30 +46,30 @@ export default function NewReleasesBanner() {
 
         <div
           ref={scrollRef}
-          className="flex gap-3 overflow-x-auto pb-1 scroll-smooth"
+          className="flex gap-4 overflow-x-auto pb-1 scroll-smooth"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {loading
             ? Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex-shrink-0 w-40 rounded-xl overflow-hidden bg-[#0f0f1a] border border-white/5"
+                  className="flex-shrink-0 w-80 rounded-2xl overflow-hidden bg-[#0f0f1a] border border-white/5"
                 >
-                  <div className="skeleton h-24" />
-                  <div className="p-2.5 space-y-1.5">
-                    <div className="skeleton h-3 w-3/4 rounded" />
-                    <div className="skeleton h-2.5 w-1/3 rounded" />
+                  <div className="skeleton h-48" />
+                  <div className="p-4 space-y-2">
+                    <div className="skeleton h-3.5 w-3/4 rounded" />
+                    <div className="skeleton h-3 w-1/3 rounded" />
                   </div>
                 </div>
               ))
             : games.map((game, i) => (
                 <article
                   key={game.id}
-                  className="card-enter flex-shrink-0 w-40 rounded-xl overflow-hidden bg-[#0f0f1a] border border-white/5 hover:border-white/15 group cursor-pointer transition-colors"
+                  className="card-enter flex-shrink-0 w-80 rounded-2xl overflow-hidden bg-[#0f0f1a] border border-white/5 hover:border-white/15 group cursor-pointer transition-colors"
                   style={{ animationDelay: `${Math.min(i * 40, 280)}ms` }}
                 >
                   {/* Image */}
-                  <div className="relative h-24 overflow-hidden bg-[#1a1a2e]">
+                  <div className="relative h-48 overflow-hidden bg-[#1a1a2e]">
                     {game.background_image ? (
                       <Image
                         src={game.background_image}
@@ -77,30 +77,30 @@ export default function NewReleasesBanner() {
                         fill
                         className="object-cover opacity-60 group-hover:opacity-85 transition-opacity duration-500"
                         style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
-                        sizes="160px"
+                        sizes="320px"
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-white/10 text-2xl font-bold">?</span>
+                        <span className="text-white/10 text-4xl font-bold">?</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0f0f1a] via-transparent to-transparent" />
 
                     {/* Release date badge */}
                     {game.released && (
-                      <span className="absolute bottom-1.5 right-1.5 text-[10px] font-medium text-white/60 bg-black/50 backdrop-blur-sm px-1.5 py-0.5 rounded-md">
+                      <span className="absolute bottom-2 right-2 text-xs font-medium text-white/60 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-md">
                         {formatDate(game.released)}
                       </span>
                     )}
                   </div>
 
                   {/* Info */}
-                  <div className="p-2.5">
-                    <p className="text-white/80 text-xs font-medium leading-snug line-clamp-2 group-hover:text-white transition-colors duration-150">
+                  <div className="p-4">
+                    <p className="text-white/80 text-sm font-medium leading-snug line-clamp-2 group-hover:text-white transition-colors duration-150">
                       {game.name}
                     </p>
                     {game.genres.length > 0 && (
-                      <p className="text-white/30 text-[10px] mt-1 truncate">
+                      <p className="text-white/30 text-xs mt-1.5 truncate">
                         {game.genres.slice(0, 2).map(g => g.name).join(' · ')}
                       </p>
                     )}
