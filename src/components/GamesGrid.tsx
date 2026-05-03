@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Game, Genre, Platform } from '@/lib/types'
 import GameCard from './GameCard'
 import AuthModal from './AuthModal'
@@ -20,6 +20,27 @@ const ORDERING_OPTIONS = [
 
 type LikeRow = { rawg_id: number; game_name: string }
 
+function Select({
+  value,
+  onChange,
+  children,
+}: {
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
+  children: React.ReactNode
+}) {
+  return (
+    <select
+      value={value}
+      onChange={onChange}
+      className="bg-white/5 border border-white/10 text-white/70 text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500/50 focus:text-white transition-[border-color,color] duration-150 cursor-pointer"
+      style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
+    >
+      {children}
+    </select>
+  )
+}
+
 export default function GamesGrid() {
   const [games, setGames] = useState<Game[]>([])
   const [genres, setGenres] = useState<Genre[]>([])
@@ -27,6 +48,7 @@ export default function GamesGrid() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [totalCount, setTotalCount] = useState(0)
+  const [gridKey, setGridKey] = useState(0) // re-triggers stagger on filter change
 
   const [platform, setPlatform] = useState('')
   const [genre, setGenre] = useState('')
@@ -38,15 +60,14 @@ export default function GamesGrid() {
   const [showAuth, setShowAuth] = useState(false)
   const [likes, setLikes] = useState<LikeRow[]>([])
 
+  const mainRef = useRef<HTMLElement>(null)
   const likedIds = new Set(likes.map((l) => l.rawg_id))
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
   const sb = createClient()
 
-  // Auth state on mount
+  // Auth state
   useEffect(() => {
-    sb.auth.getUser().then(({ data }) => {
-      setUserEmail(data.user?.email ?? null)
-    })
+    sb.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null))
     const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
       setUserEmail(session?.user?.email ?? null)
       if (!session) setLikes([])
@@ -55,7 +76,7 @@ export default function GamesGrid() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Load likes when logged in
+  // Likes
   useEffect(() => {
     if (!userEmail) { setLikes([]); return }
     fetch('/api/likes').then(r => r.json()).then(data => {
@@ -91,6 +112,7 @@ export default function GamesGrid() {
       )
       setGames(mapped)
       setTotalCount(data.count ?? 0)
+      setGridKey(k => k + 1) // re-trigger stagger animation
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Error desconocido')
     } finally {
@@ -141,8 +163,16 @@ export default function GamesGrid() {
     setLikes([])
   }
 
+  const changePage = (p: number) => {
+    setPage(p)
+    mainRef.current?.scrollTo({ top: 0 })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
-    <div className="min-h-screen bg-gray-950 font-[family-name:var(--font-geist-sans)]">
+    <div className="min-h-screen flex flex-col">
+
+      {/* Auth Modal */}
       {showAuth && (
         <AuthModal
           onClose={() => setShowAuth(false)}
@@ -150,26 +180,35 @@ export default function GamesGrid() {
         />
       )}
 
-      <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between gap-4 mb-3">
+      {/* Header */}
+      <header className="sticky top-0 z-10 border-b border-white/5 bg-[#080810]/80 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-4 py-4">
+
+            {/* Brand */}
             <div className="shrink-0">
-              <h1 className="text-xl font-bold text-white">GameScope</h1>
-              <p className="text-xs text-gray-500">Catálogo de videojuegos</p>
+              <h1 className="text-white font-bold text-xl tracking-tight">
+                Game<span className="text-indigo-400">Scope</span>
+              </h1>
+              <p className="text-white/30 text-xs mt-0.5 hidden sm:block">
+                {totalCount > 0 ? `${totalCount.toLocaleString('es-ES')} juegos` : 'Catálogo de videojuegos'}
+              </p>
             </div>
+
             {/* Auth */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               {userEmail ? (
                 <>
-                  <span className="text-xs text-gray-400 hidden sm:block">{userEmail}</span>
                   {likes.length > 0 && (
-                    <span className="text-xs bg-red-500/10 text-red-400 border border-red-500/20 rounded-full px-2 py-0.5">
-                      ♥ {likes.length}
+                    <span className="hidden sm:flex items-center gap-1.5 text-xs text-red-400/80 bg-red-500/8 border border-red-500/15 rounded-full px-2.5 py-1">
+                      <span>♥</span> {likes.length}
                     </span>
                   )}
+                  <span className="text-xs text-white/30 hidden md:block max-w-[140px] truncate">{userEmail}</span>
                   <button
                     onClick={handleSignOut}
-                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors px-2 py-1 rounded border border-gray-700 hover:border-gray-500"
+                    className="text-xs text-white/40 hover:text-white/70 px-3 py-1.5 rounded-lg border border-white/8 hover:border-white/15 transition-[color,border-color] duration-150 active:scale-[0.97]"
+                    style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
                   >
                     Salir
                   </button>
@@ -177,7 +216,8 @@ export default function GamesGrid() {
               ) : (
                 <button
                   onClick={() => setShowAuth(true)}
-                  className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg transition-colors"
+                  className="text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-xl transition-[transform,background-color] duration-150 active:scale-[0.97]"
+                  style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
                 >
                   Iniciar sesión
                 </button>
@@ -186,93 +226,63 @@ export default function GamesGrid() {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap gap-2">
-            <select
-              value={platform}
-              onChange={applyFilter(setPlatform)}
-              className="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500"
-            >
+          <div className="flex flex-wrap gap-2 pb-4">
+            <Select value={platform} onChange={applyFilter(setPlatform)}>
               <option value="">Todas las plataformas</option>
-              {platforms.map((p) => (
-                <option key={p.id} value={String(p.id)}>{p.name}</option>
-              ))}
-            </select>
+              {platforms.map((p) => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
+            </Select>
 
-            <select
-              value={genre}
-              onChange={applyFilter(setGenre)}
-              className="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500"
-            >
+            <Select value={genre} onChange={applyFilter(setGenre)}>
               <option value="">Todos los géneros</option>
-              {genres.map((g) => (
-                <option key={g.id} value={String(g.id)}>{g.name}</option>
-              ))}
-            </select>
+              {genres.map((g) => <option key={g.id} value={String(g.id)}>{g.name}</option>)}
+            </Select>
 
-            <select
-              value={year}
-              onChange={applyFilter(setYear)}
-              className="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500"
-            >
+            <Select value={year} onChange={applyFilter(setYear)}>
               <option value="">Todos los años</option>
-              {YEARS.map((y) => (
-                <option key={y} value={String(y)}>{y}</option>
-              ))}
-            </select>
+              {YEARS.map((y) => <option key={y} value={String(y)}>{y}</option>)}
+            </Select>
 
-            <select
-              value={ordering}
-              onChange={applyFilter(setOrdering)}
-              className="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500"
-            >
-              {ORDERING_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <Select value={ordering} onChange={applyFilter(setOrdering)}>
+              {ORDERING_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </Select>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-sm text-gray-400">
-            {loading ? 'Cargando…' : `${totalCount.toLocaleString('es-ES')} juegos`}
-          </p>
-          {!loading && totalPages > 1 && (
-            <span className="text-sm text-gray-500">
-              Página {page} de {totalPages.toLocaleString('es-ES')}
-            </span>
-          )}
-        </div>
+      {/* Main */}
+      <main ref={mainRef} className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
 
         {error && (
-          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm mb-6">
+          <div className="p-4 bg-red-500/8 border border-red-500/15 rounded-xl text-red-400 text-sm mb-6">
             {error}
           </div>
         )}
 
+        {/* Skeleton grid */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div key={i} className="rounded-xl border border-gray-800 bg-gray-900 animate-pulse">
-                <div className="h-40 bg-gray-800" />
-                <div className="p-3 space-y-2">
-                  <div className="h-4 bg-gray-800 rounded w-3/4" />
-                  <div className="h-3 bg-gray-800 rounded w-1/4" />
-                  <div className="flex gap-1">
-                    <div className="h-5 w-14 bg-gray-800 rounded" />
-                    <div className="h-5 w-14 bg-gray-800 rounded" />
+            {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+              <div key={i} className="rounded-2xl overflow-hidden bg-[#0f0f1a] border border-white/5">
+                <div className="skeleton h-44" />
+                <div className="p-4 space-y-3">
+                  <div className="skeleton h-4 w-3/4 rounded-lg" />
+                  <div className="skeleton h-3 w-1/4 rounded-lg" />
+                  <div className="flex gap-1.5">
+                    <div className="skeleton h-5 w-16 rounded-lg" />
+                    <div className="skeleton h-5 w-14 rounded-lg" />
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {games.map((g) => (
+          /* Game grid — key changes on each fetch to re-trigger stagger */
+          <div key={gridKey} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {games.map((g, i) => (
               <GameCard
                 key={g.id}
                 game={g}
+                index={i}
                 isLiked={likedIds.has(g.id)}
                 loggedIn={!!userEmail}
                 onToggleLike={handleToggleLike}
@@ -282,14 +292,16 @@ export default function GamesGrid() {
           </div>
         )}
 
+        {/* Pagination */}
         {!loading && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-10">
+          <div className="flex items-center justify-center gap-1.5 mt-12">
             <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => changePage(Math.max(1, page - 1))}
               disabled={page === 1}
-              className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 text-sm hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 rounded-xl bg-white/5 border border-white/8 text-white/60 text-sm hover:bg-white/8 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-[transform,background-color,color,opacity] duration-150 active:scale-[0.97]"
+              style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
             >
-              ← Anterior
+              ←
             </button>
 
             {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
@@ -298,12 +310,13 @@ export default function GamesGrid() {
               return (
                 <button
                   key={p}
-                  onClick={() => setPage(p)}
-                  className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                  onClick={() => changePage(p)}
+                  className={`w-9 h-9 rounded-xl text-sm font-medium transition-[transform,background-color,color] duration-150 active:scale-[0.95] ${
                     p === page
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700'
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                      : 'bg-white/5 border border-white/8 text-white/50 hover:bg-white/8 hover:text-white'
                   }`}
+                  style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
                 >
                   {p}
                 </button>
@@ -311,13 +324,21 @@ export default function GamesGrid() {
             })}
 
             <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => changePage(Math.min(totalPages, page + 1))}
               disabled={page === totalPages}
-              className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 text-sm hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 rounded-xl bg-white/5 border border-white/8 text-white/60 text-sm hover:bg-white/8 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-[transform,background-color,color,opacity] duration-150 active:scale-[0.97]"
+              style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
             >
-              Siguiente →
+              →
             </button>
           </div>
+        )}
+
+        {/* Pagination info */}
+        {!loading && totalPages > 1 && (
+          <p className="text-center text-xs text-white/20 mt-4">
+            Página {page} de {totalPages.toLocaleString('es-ES')}
+          </p>
         )}
       </main>
     </div>

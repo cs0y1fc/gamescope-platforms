@@ -9,72 +9,92 @@ type Props = {
   loggedIn: boolean
   onToggleLike: (game: Game) => void
   onNeedAuth: () => void
+  index?: number
 }
 
-export default function GameCard({ game, isLiked, loggedIn, onToggleLike, onNeedAuth }: Props) {
+export default function GameCard({ game, isLiked, loggedIn, onToggleLike, onNeedAuth, index = 0 }: Props) {
   const releaseYear = game.released ? new Date(game.released).getFullYear() : null
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     if (!loggedIn) { onNeedAuth(); return }
     onToggleLike(game)
   }
 
+  const metacriticColor =
+    game.metacritic && game.metacritic >= 75 ? '#22c55e'
+    : game.metacritic && game.metacritic >= 50 ? '#eab308'
+    : '#ef4444'
+
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900 overflow-hidden hover:border-gray-600 transition-colors group">
-      <div className="relative h-40 bg-gray-800">
+    <article
+      className="card-enter group relative flex flex-col rounded-2xl overflow-hidden bg-[#0f0f1a] border border-white/5 hover:border-white/10 transition-colors"
+      style={{
+        animationDelay: `${Math.min(index * 40, 300)}ms`,
+      }}
+    >
+      {/* Image */}
+      <div className="relative h-44 overflow-hidden bg-[#1a1a2e]">
         {game.background_image ? (
           <Image
             src={game.background_image}
             alt={game.name}
             fill
-            className="object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+            className="object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500"
+            style={{ transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)' }}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-700 text-sm">
-            Sin imagen
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-white/10 text-4xl font-bold select-none">?</span>
           </div>
         )}
 
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0f0f1a] via-transparent to-transparent" />
+
+        {/* Like button — scale(0.95)+opacity, NOT scale(0) */}
         <button
           onClick={handleLike}
-          title={loggedIn ? (isLiked ? 'Quitar like' : 'Dar like') : 'Inicia sesión para dar likes'}
-          className={`absolute top-2 left-2 w-7 h-7 flex items-center justify-center rounded-full transition-all
+          title={loggedIn ? (isLiked ? 'Quitar like' : 'Dar like') : 'Inicia sesión'}
+          className={`
+            absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full text-sm
+            transition-[transform,opacity,background-color] duration-150
+            active:scale-95
             ${isLiked
-              ? 'bg-red-500 text-white'
-              : 'bg-black/50 text-gray-400 hover:bg-black/70 hover:text-red-400'
-            }`}
+              ? 'bg-red-500 text-white shadow-lg shadow-red-500/30'
+              : 'bg-black/40 text-white/50 hover:bg-black/60 hover:text-white/80 backdrop-blur-sm'
+            }
+          `}
+          style={{ transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)' }}
         >
           {isLiked ? '♥' : '♡'}
         </button>
 
+        {/* Metacritic */}
         {game.metacritic && (
           <span
-            className={`absolute top-2 right-2 text-xs font-bold px-2 py-0.5 rounded ${
-              game.metacritic >= 75
-                ? 'bg-green-500/90 text-white'
-                : game.metacritic >= 50
-                ? 'bg-yellow-500/90 text-black'
-                : 'bg-red-500/90 text-white'
-            }`}
+            className="absolute top-3 right-3 text-xs font-bold tabular-nums px-2 py-0.5 rounded-md"
+            style={{ background: `${metacriticColor}22`, color: metacriticColor, border: `1px solid ${metacriticColor}44` }}
           >
             {game.metacritic}
           </span>
         )}
       </div>
 
-      <div className="p-3">
-        <h3 className="text-white font-semibold text-sm leading-tight line-clamp-2 mb-2">
+      {/* Content */}
+      <div className="flex flex-col flex-1 p-4 gap-3">
+        <h3 className="text-white font-semibold text-sm leading-snug line-clamp-2">
           {game.name}
         </h3>
 
-        <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
-          <span>{releaseYear ?? '—'}</span>
+        <div className="flex items-center justify-between mt-auto">
+          <span className="text-white/30 text-xs tabular-nums">{releaseYear ?? '—'}</span>
           {game.rating > 0 && (
-            <span className="flex items-center gap-1">
-              <span className="text-yellow-400">★</span>
-              {game.rating.toFixed(1)}
+            <span className="flex items-center gap-1 text-xs text-amber-400/80">
+              <span>★</span>
+              <span className="tabular-nums">{game.rating.toFixed(1)}</span>
             </span>
           )}
         </div>
@@ -84,7 +104,7 @@ export default function GameCard({ game, isLiked, loggedIn, onToggleLike, onNeed
             {game.genres.slice(0, 3).map((g) => (
               <span
                 key={g.id}
-                className="text-xs bg-gray-800 text-gray-400 rounded px-1.5 py-0.5"
+                className="text-xs px-2 py-0.5 rounded-md bg-white/5 text-white/40 border border-white/5"
               >
                 {g.name}
               </span>
@@ -92,6 +112,6 @@ export default function GameCard({ game, isLiked, loggedIn, onToggleLike, onNeed
           </div>
         )}
       </div>
-    </div>
+    </article>
   )
 }
