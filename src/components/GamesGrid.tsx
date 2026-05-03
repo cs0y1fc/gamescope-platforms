@@ -227,32 +227,35 @@ export default function GamesGrid() {
           </div>
 
           {/* Filters — scrollable horitzontal a mòbil */}
-          <div
-            className="flex gap-2 pb-4 overflow-x-auto"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            <div className="card-enter shrink-0" style={{ animationDelay: '0ms' }}>
-              <Select value={platform} onChange={applyFilter(setPlatform)}>
-                <option value="">Todas las plataformas</option>
-                {platforms.map((p) => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
-              </Select>
-            </div>
-            <div className="card-enter shrink-0" style={{ animationDelay: '50ms' }}>
-              <Select value={genre} onChange={applyFilter(setGenre)}>
-                <option value="">Todos los géneros</option>
-                {genres.map((g) => <option key={g.id} value={String(g.id)}>{g.name}</option>)}
-              </Select>
-            </div>
-            <div className="card-enter shrink-0" style={{ animationDelay: '100ms' }}>
-              <Select value={year} onChange={applyFilter(setYear)}>
-                <option value="">Todos los años</option>
-                {YEARS.map((y) => <option key={y} value={String(y)}>{y}</option>)}
-              </Select>
-            </div>
-            <div className="card-enter shrink-0" style={{ animationDelay: '150ms' }}>
-              <Select value={ordering} onChange={applyFilter(setOrdering)}>
-                {ORDERING_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </Select>
+          <div className="relative">
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#080810] to-transparent z-10 sm:hidden" />
+            <div
+              className="flex gap-2 pb-4 overflow-x-auto"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              <div className="card-enter shrink-0" style={{ animationDelay: '0ms' }}>
+                <Select value={platform} onChange={applyFilter(setPlatform)}>
+                  <option value="">Todas las plataformas</option>
+                  {platforms.map((p) => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
+                </Select>
+              </div>
+              <div className="card-enter shrink-0" style={{ animationDelay: '50ms' }}>
+                <Select value={genre} onChange={applyFilter(setGenre)}>
+                  <option value="">Todos los géneros</option>
+                  {genres.map((g) => <option key={g.id} value={String(g.id)}>{g.name}</option>)}
+                </Select>
+              </div>
+              <div className="card-enter shrink-0" style={{ animationDelay: '100ms' }}>
+                <Select value={year} onChange={applyFilter(setYear)}>
+                  <option value="">Todos los años</option>
+                  {YEARS.map((y) => <option key={y} value={String(y)}>{y}</option>)}
+                </Select>
+              </div>
+              <div className="card-enter shrink-0" style={{ animationDelay: '150ms' }}>
+                <Select value={ordering} onChange={applyFilter(setOrdering)}>
+                  {ORDERING_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </Select>
+              </div>
             </div>
           </div>
         </div>
