@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Game, Genre, Platform } from '@/lib/types'
 import GameCard from './GameCard'
 import AuthModal from './AuthModal'
+import NewReleasesBanner from './NewReleasesBanner'
 import { createClient } from '@/lib/supabase-browser'
 
 const PAGE_SIZE = 20
@@ -251,6 +252,8 @@ export default function GamesGrid() {
 
       {/* Main */}
       <main ref={mainRef} className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+
+        <NewReleasesBanner />
 
         {error && (
           <div className="p-4 bg-red-500/8 border border-red-500/15 rounded-xl text-red-400 text-sm mb-6">
