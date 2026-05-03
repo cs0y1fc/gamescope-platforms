@@ -29,19 +29,20 @@ export default function GameCard({ game, isLiked, loggedIn, onToggleLike, onNeed
 
   return (
     <article
-      className="card-enter group relative flex flex-col rounded-2xl overflow-hidden bg-[#0f0f1a] border border-white/5 hover:border-white/10 transition-colors"
+      className="card-enter card-glow group relative flex flex-col rounded-2xl overflow-hidden bg-[#0f0f1a] border border-white/5 hover:border-indigo-500/20 transition-[transform,border-color] duration-300 hover:-translate-y-0.5"
       style={{
         animationDelay: `${Math.min(index * 40, 300)}ms`,
+        transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)',
       }}
     >
       {/* Image */}
-      <div className="relative h-44 overflow-hidden bg-[#1a1a2e]">
+      <div className="relative h-52 overflow-hidden bg-[#1a1a2e]">
         {game.background_image ? (
           <Image
             src={game.background_image}
             alt={game.name}
             fill
-            className="object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500"
+            className="object-cover opacity-60 group-hover:opacity-90 group-hover:scale-[1.06] transition-[opacity,transform] duration-700"
             style={{ transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)' }}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
@@ -51,20 +52,20 @@ export default function GameCard({ game, isLiked, loggedIn, onToggleLike, onNeed
           </div>
         )}
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0f0f1a] via-transparent to-transparent" />
+        {/* Gradient overlay — richer, preserves top of image */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0f0f1a] via-[#0f0f1a]/40 to-transparent" />
 
-        {/* Like button — scale(0.95)+opacity, NOT scale(0) */}
+        {/* Like button */}
         <button
           onClick={handleLike}
           title={loggedIn ? (isLiked ? 'Quitar like' : 'Dar like') : 'Inicia sesión'}
           className={`
-            absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full text-sm
-            transition-[transform,opacity,background-color] duration-150
+            absolute top-3 left-3 w-9 h-9 flex items-center justify-center rounded-full text-sm
+            transition-[transform,opacity,background-color,box-shadow] duration-150
             active:scale-95
             ${isLiked
-              ? 'bg-red-500 text-white shadow-lg shadow-red-500/30'
-              : 'bg-black/40 text-white/50 hover:bg-black/60 hover:text-white/80 backdrop-blur-sm'
+              ? 'bg-red-500 text-white shadow-lg shadow-red-500/40'
+              : 'bg-black/50 text-white/50 hover:bg-black/70 hover:text-white/90 backdrop-blur-sm'
             }
           `}
           style={{ transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)' }}
@@ -84,27 +85,34 @@ export default function GameCard({ game, isLiked, loggedIn, onToggleLike, onNeed
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-1 p-4 gap-3">
-        <h3 className="text-white font-semibold text-sm leading-snug line-clamp-2">
+      <div className="flex flex-col flex-1 p-4 gap-2.5">
+        <h3 className="text-white/90 font-semibold text-sm leading-snug line-clamp-2 group-hover:text-white transition-colors duration-150">
           {game.name}
         </h3>
 
-        <div className="flex items-center justify-between mt-auto">
+        <div className="flex items-center justify-between">
           <span className="text-white/30 text-xs tabular-nums">{releaseYear ?? '—'}</span>
-          {game.rating > 0 && (
-            <span className="flex items-center gap-1 text-xs text-amber-400/80">
-              <span>★</span>
-              <span className="tabular-nums">{game.rating.toFixed(1)}</span>
-            </span>
-          )}
         </div>
+
+        {/* Rating bar */}
+        {game.rating > 0 && (
+          <div className="flex items-center gap-2 mt-auto">
+            <div className="flex-1 h-0.5 rounded-full bg-white/8 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-300"
+                style={{ width: `${(game.rating / 5) * 100}%` }}
+              />
+            </div>
+            <span className="text-xs text-amber-400/80 tabular-nums shrink-0">{game.rating.toFixed(1)}</span>
+          </div>
+        )}
 
         {game.genres.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {game.genres.slice(0, 3).map((g) => (
               <span
                 key={g.id}
-                className="text-xs px-2 py-0.5 rounded-md bg-white/5 text-white/40 border border-white/5"
+                className="text-xs px-2 py-0.5 rounded-md bg-white/5 text-white/35 border border-white/5 group-hover:border-white/8 transition-colors duration-150"
               >
                 {g.name}
               </span>

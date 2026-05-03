@@ -182,18 +182,20 @@ export default function GamesGrid() {
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-white/5 bg-[#080810]/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-10 border-b border-white/8 bg-[#080810]/85 backdrop-blur-xl shadow-[0_1px_0_rgba(255,255,255,0.03)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4 py-4">
 
             {/* Brand */}
-            <div className="shrink-0">
-              <h1 className="text-white font-bold text-xl tracking-tight">
-                Game<span className="text-indigo-400">Scope</span>
+            <div className="shrink-0 flex flex-col gap-0.5">
+              <h1 className="text-gradient font-bold text-xl tracking-tight">
+                GameScope
               </h1>
-              <p className="text-white/30 text-xs mt-0.5 hidden sm:block">
-                {totalCount > 0 ? `${totalCount.toLocaleString('es-ES')} juegos` : 'Catálogo de videojuegos'}
-              </p>
+              {totalCount > 0 && (
+                <span className="hidden sm:inline-flex self-start text-[10px] text-indigo-300/50 bg-indigo-500/8 border border-indigo-500/15 rounded-full px-2 py-0.5">
+                  {totalCount.toLocaleString('es-ES')} juegos
+                </span>
+              )}
             </div>
 
             {/* Auth */}
@@ -208,7 +210,7 @@ export default function GamesGrid() {
                   <span className="text-xs text-white/30 hidden md:block max-w-[140px] truncate">{userEmail}</span>
                   <button
                     onClick={handleSignOut}
-                    className="text-xs text-white/40 hover:text-white/70 px-3 py-1.5 rounded-lg border border-white/8 hover:border-white/15 transition-[color,border-color] duration-150 active:scale-[0.97]"
+                    className="text-xs text-white/40 hover:text-white/70 px-3 py-1.5 rounded-lg border border-white/8 hover:border-white/20 transition-[color,border-color] duration-150 active:scale-[0.97]"
                     style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
                   >
                     Salir
@@ -217,7 +219,7 @@ export default function GamesGrid() {
               ) : (
                 <button
                   onClick={() => setShowAuth(true)}
-                  className="text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-xl transition-[transform,background-color] duration-150 active:scale-[0.97]"
+                  className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-indigo-500/20 transition-[transform,background-color,box-shadow] duration-150 active:scale-[0.97]"
                   style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
                 >
                   Iniciar sesión
