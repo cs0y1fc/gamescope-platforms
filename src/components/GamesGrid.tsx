@@ -182,13 +182,13 @@ export default function GamesGrid() {
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-white/8 bg-[#080810]/85 backdrop-blur-xl shadow-[0_1px_0_rgba(255,255,255,0.03)]">
+      <header className="sticky top-0 z-10 border-b border-white/6 bg-[#050507]/90 backdrop-blur-xl shadow-[0_1px_0_rgba(255,255,255,0.03)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4 py-4">
 
             {/* Brand */}
             <div className="shrink-0 flex flex-col gap-0.5">
-              <h1 className="text-gradient font-bold text-xl tracking-tight">
+              <h1 className="font-display text-gradient font-bold text-xl tracking-wider uppercase">
                 GameScope
               </h1>
               {totalCount > 0 && (
@@ -274,26 +274,18 @@ export default function GamesGrid() {
           </div>
         )}
 
-        {/* Skeleton grid */}
+        {/* Skeleton grid — poster format */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-              <div key={i} className="rounded-2xl overflow-hidden bg-[#0f0f1a] border border-white/5">
-                <div className="skeleton h-44" />
-                <div className="p-4 space-y-3">
-                  <div className="skeleton h-4 w-3/4 rounded-lg" />
-                  <div className="skeleton h-3 w-1/4 rounded-lg" />
-                  <div className="flex gap-1.5">
-                    <div className="skeleton h-5 w-16 rounded-lg" />
-                    <div className="skeleton h-5 w-14 rounded-lg" />
-                  </div>
-                </div>
+              <div key={i} className="rounded-xl overflow-hidden bg-[#0c0c18] border border-white/5 aspect-[3/4]">
+                <div className="skeleton w-full h-full" />
               </div>
             ))}
           </div>
         ) : (
-          /* Game grid — key changes on each fetch to re-trigger stagger */
-          <div key={gridKey} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          /* Game grid — poster format, 2 cols mobile */
+          <div key={gridKey} className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {games.map((g, i) => (
               <GameCard
                 key={g.id}
