@@ -59,6 +59,7 @@ export default function PlatformsGrid() {
     }
   }, [])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadAll() }, [loadAll])
 
   const triggerSync = async () => {

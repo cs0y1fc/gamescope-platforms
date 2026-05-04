@@ -6,14 +6,15 @@ import { createClient } from '@/lib/supabase-browser'
 type Props = {
   onClose: () => void
   onAuth: (email: string) => void
+  initialError?: string | null
 }
 
-export default function AuthModal({ onClose, onAuth }: Props) {
+export default function AuthModal({ onClose, onAuth, initialError }: Props) {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(initialError ?? null)
   const [info, setInfo] = useState<string | null>(null)
   const [visible, setVisible] = useState(false)
   const emailRef = useRef<HTMLInputElement>(null)
@@ -70,12 +71,12 @@ export default function AuthModal({ onClose, onAuth }: Props) {
       onClick={(e) => e.target === e.currentTarget && close()}
     >
       <div
-        className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0d0d1a] shadow-2xl shadow-black/60"
+        className="w-full max-w-sm rounded-2xl glass-panel shadow-2xl shadow-black/60"
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? 'scale(1) translateY(0)' : 'scale(0.96) translateY(8px)',
           transition: 'opacity 200ms cubic-bezier(0.23,1,0.32,1), transform 200ms cubic-bezier(0.23,1,0.32,1)',
-          boxShadow: visible ? '0 0 0 1px rgba(99,102,241,0.08), 0 32px 64px rgba(0,0,0,0.6)' : undefined,
+          boxShadow: visible ? '0 0 0 1px rgba(99,102,241,0.12), 0 32px 64px rgba(0,0,0,0.7)' : undefined,
         }}
       >
         <div className="p-6">

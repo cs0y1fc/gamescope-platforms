@@ -1,154 +1,148 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { RawgGame } from '@/lib/rawg'
 
 function formatDate(dateStr: string | null): string | null {
   if (!dateStr) return null
   const d = new Date(dateStr)
-  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 export default function NewReleasesBanner() {
   const [games, setGames] = useState<RawgGame[]>([])
   const [loading, setLoading] = useState(true)
   const [activeIndex, setActiveIndex] = useState(0)
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const cardWidthRef = useRef<number>(0)
-
-  useEffect(() => {
-    if (!scrollRef.current || games.length === 0) return
-    const firstCard = scrollRef.current.querySelector('article') as HTMLElement | null
-    if (firstCard) cardWidthRef.current = firstCard.offsetWidth + 12
-  }, [games])
 
   useEffect(() => {
     const controller = new AbortController()
     fetch('/api/new-releases', { signal: controller.signal })
       .then(r => r.json())
-      .then(data => { if (Array.isArray(data)) setGames(data) })
+      .then(data => { if (Array.isArray(data)) setGames(data.slice(0, 5)) }) // Take top 5
       .catch(err => { if (err.name !== 'AbortError') console.error(err) })
       .finally(() => setLoading(false))
     return () => controller.abort()
   }, [])
 
-  const handleScroll = () => {
-    if (!scrollRef.current || cardWidthRef.current === 0) return
-    setActiveIndex(Math.round(scrollRef.current.scrollLeft / cardWidthRef.current))
-  }
-
-  const scrollToIndex = (i: number) => {
-    if (!scrollRef.current || cardWidthRef.current === 0) return
-    scrollRef.current.scrollTo({ left: i * cardWidthRef.current, behavior: 'smooth' })
-    setActiveIndex(i)
-  }
+  // Auto-advance
+  useEffect(() => {
+    if (games.length <= 1) return
+    const interval = setInterval(() => {
+      setActiveIndex(current => (current + 1) % games.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [games.length])
 
   if (!loading && games.length === 0) return null
 
   return (
-    <section className="mb-8">
-      {/* Header row */}
-      <div className="flex items-center gap-2.5 mb-3">
-        <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-        </span>
-        <h2 className="text-xs font-semibold text-white/50 uppercase tracking-widest">
-          Últimas novedades
-        </h2>
-      </div>
-
-      {/* Scrollable strip with edge fades */}
-      <div className="relative">
-        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#080810] to-transparent z-10" />
-        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#080810] to-transparent z-10" />
-
-        <div
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {loading
-            ? Array.from({ length: 8 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex-shrink-0 w-[168px] sm:w-64 rounded-xl sm:rounded-2xl overflow-hidden bg-[#0f0f1a] border border-white/5 snap-start"
-                >
-                  <div className="skeleton h-28 sm:h-40" />
-                  <div className="p-2.5 sm:p-3.5 space-y-1.5">
-                    <div className="skeleton h-3 w-3/4 rounded" />
-                    <div className="skeleton h-2.5 w-1/3 rounded" />
-                  </div>
-                </div>
-              ))
-            : games.map((game, i) => (
-                <article
-                  key={game.id}
-                  className="card-enter flex-shrink-0 w-[168px] sm:w-64 rounded-xl sm:rounded-2xl overflow-hidden bg-[#0f0f1a] border border-white/5 hover:border-white/15 group cursor-pointer snap-start transition-[transform,border-color] duration-300 sm:hover:-translate-y-1"
-                  style={{
-                    animationDelay: `${Math.min(i * 40, 280)}ms`,
-                    transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)',
-                  }}
-                >
-                  {/* Image */}
-                  <div className="relative h-28 sm:h-40 overflow-hidden bg-[#1a1a2e]">
-                    {game.background_image ? (
-                      <Image
-                        src={game.background_image}
-                        alt={game.name}
-                        fill
-                        className="object-cover opacity-60 group-hover:opacity-85 transition-opacity duration-500"
-                        style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
-                        sizes="(max-width: 640px) 168px, 256px"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-white/10 text-2xl sm:text-4xl font-bold">?</span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0f0f1a] via-transparent to-transparent" />
-                    {game.released && (
-                      <span className="absolute bottom-1.5 sm:bottom-2 right-1.5 sm:right-2 text-[10px] sm:text-xs font-medium text-white/60 bg-black/50 backdrop-blur-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">
-                        {formatDate(game.released)}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="p-2.5 sm:p-3.5">
-                    <p className="text-white/80 text-xs sm:text-sm font-medium leading-snug line-clamp-2 group-hover:text-white transition-colors duration-150">
-                      {game.name}
-                    </p>
-                    {game.genres.length > 0 && (
-                      <p className="text-white/30 text-[10px] sm:text-xs mt-1 sm:mt-1.5 truncate">
-                        {game.genres.slice(0, 2).map(g => g.name).join(' · ')}
-                      </p>
-                    )}
-                  </div>
-                </article>
-              ))}
-        </div>
-      </div>
-
-      {/* Dots indicator — only on mobile */}
-      {!loading && games.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-3 sm:hidden">
+    <section className="mb-12 rounded-3xl overflow-hidden relative glass-strong card-ring-hero h-[400px] sm:h-[500px] lg:h-[550px] group">
+      {loading ? (
+        <div className="absolute inset-0 skeleton" />
+      ) : (
+        <>
+          {/* Main Image Layer */}
           {games.map((game, i) => (
-            <button
+            <div
               key={game.id}
-              onClick={() => scrollToIndex(i)}
-              aria-label={`Anar a la targeta ${i + 1}`}
-              className={`rounded-full h-1.5 transition-all duration-200 ${
-                i === activeIndex
-                  ? 'w-4 bg-indigo-400'
-                  : 'w-1.5 bg-white/20 hover:bg-white/40'
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                i === activeIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
               }`}
-              style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
-            />
+            >
+              {game.background_image && (
+                <Image
+                  src={game.background_image}
+                  alt={game.name}
+                  fill
+                  priority={i === 0}
+                  className="object-cover transform scale-105 group-hover:scale-100 transition-transform duration-[10s] ease-out"
+                  sizes="(max-width: 1280px) 100vw, 1280px"
+                />
+              )}
+              {/* Gradients for readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/60 to-transparent opacity-90" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#030305] via-[#030305]/40 to-transparent opacity-90" />
+            </div>
           ))}
-        </div>
+
+          {/* Content Layer */}
+          <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 sm:p-10 lg:p-16">
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+                </span>
+                <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-emerald-400">
+                  Nuevos Lanzamientos
+                </span>
+              </div>
+
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-display font-bold text-white mb-4 leading-tight drop-shadow-2xl">
+                {games[activeIndex]?.name}
+              </h2>
+              
+              <div className="flex flex-wrap items-center gap-3 mb-8">
+                {games[activeIndex]?.released && (
+                  <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-sm font-medium text-white border border-white/10">
+                    {formatDate(games[activeIndex].released)}
+                  </span>
+                )}
+                <div className="flex gap-2">
+                  {games[activeIndex]?.genres.slice(0, 3).map(g => (
+                    <span key={g.id} className="text-sm font-medium text-white/60">
+                      {g.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <button className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center gap-2">
+                  Ver Detalles
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Prev/Next Scroll Buttons */}
+          <button
+            onClick={() => setActiveIndex(current => (current - 1 + games.length) % games.length)}
+            aria-label="Anterior"
+            className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/40 transition-all active:scale-95 flex items-center justify-center opacity-0 group-hover:opacity-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setActiveIndex(current => (current + 1) % games.length)}
+            aria-label="Siguiente"
+            className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/40 transition-all active:scale-95 flex items-center justify-center opacity-0 group-hover:opacity-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            </svg>
+          </button>
+
+          {/* Navigation Indicators */}
+          <div className="absolute right-6 sm:right-10 bottom-6 sm:bottom-10 z-20 flex gap-2">
+            {games.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveIndex(i)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === activeIndex ? 'w-8 bg-emerald-500' : 'w-2 bg-white/30 hover:bg-white/50'
+                }`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
+        </>
       )}
     </section>
   )

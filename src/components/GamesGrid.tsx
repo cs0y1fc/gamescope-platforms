@@ -5,6 +5,7 @@ import { Game, Genre, Platform } from '@/lib/types'
 import GameCard from './GameCard'
 import AuthModal from './AuthModal'
 import NewReleasesBanner from './NewReleasesBanner'
+import NewsSection from './NewsSection'
 import { createClient } from '@/lib/supabase-browser'
 
 const PAGE_SIZE = 20
@@ -31,14 +32,20 @@ function Select({
   children: React.ReactNode
 }) {
   return (
-    <select
-      value={value}
-      onChange={onChange}
-      className="bg-white/5 border border-white/10 text-white/70 text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500/50 focus:text-white transition-[border-color,color] duration-150 cursor-pointer"
-      style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
-    >
-      {children}
-    </select>
+    <div className="relative group">
+      <select
+        value={value}
+        onChange={onChange}
+        className="appearance-none bg-[#0c0c18]/80 backdrop-blur-xl border border-white/10 hover:border-indigo-500/50 text-white/80 text-sm font-medium rounded-full px-5 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all duration-300 cursor-pointer shadow-lg shadow-black/20"
+      >
+        {children}
+      </select>
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-indigo-400 group-hover:text-indigo-300 transition-colors">
+        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+        </svg>
+      </div>
+    </div>
   )
 }
 
@@ -59,12 +66,28 @@ export default function GamesGrid() {
 
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [showAuth, setShowAuth] = useState(false)
+  const [authError, setAuthError] = useState<string | null>(null)
   const [likes, setLikes] = useState<LikeRow[]>([])
 
   const mainRef = useRef<HTMLElement>(null)
   const likedIds = new Set(likes.map((l) => l.rawg_id))
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
   const sb = createClient()
+
+  // Surface ?auth_error=... from OAuth callback
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const err = params.get('auth_error')
+    if (err) {
+      setAuthError(err)
+      setShowAuth(true)
+      params.delete('auth_error')
+      const newSearch = params.toString()
+      const cleaned = window.location.pathname + (newSearch ? `?${newSearch}` : '')
+      window.history.replaceState({}, '', cleaned)
+    }
+  }, [])
 
   // Auth state
   useEffect(() => {
@@ -133,7 +156,9 @@ export default function GamesGrid() {
     }
   }, [])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadFilters() }, [loadFilters])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadGames() }, [loadGames])
 
   const applyFilter = (setter: (v: string) => void) => (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -171,47 +196,53 @@ export default function GamesGrid() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative overflow-x-hidden">
+
+      {/* Background abstract gradients */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[120px]" />
+        <div className="absolute top-[40%] right-[-10%] w-[40%] h-[50%] bg-emerald-500/10 rounded-full blur-[150px]" />
+      </div>
 
       {/* Auth Modal */}
       {showAuth && (
         <AuthModal
-          onClose={() => setShowAuth(false)}
-          onAuth={(email) => { setUserEmail(email); setShowAuth(false) }}
+          initialError={authError}
+          onClose={() => { setShowAuth(false); setAuthError(null) }}
+          onAuth={(email) => { setUserEmail(email); setShowAuth(false); setAuthError(null) }}
         />
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-white/6 bg-[#050507]/90 backdrop-blur-xl shadow-[0_1px_0_rgba(255,255,255,0.03)]">
+      <header className="sticky top-0 z-50 glass-strong border-b border-white/5 shadow-2xl shadow-black/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4 py-4">
+          <div className="flex items-center justify-between gap-4 py-4 sm:py-5">
 
             {/* Brand */}
-            <div className="shrink-0 flex flex-col gap-0.5">
-              <h1 className="font-display text-gradient font-bold text-xl tracking-wider uppercase">
-                GameScope
-              </h1>
-              {totalCount > 0 && (
-                <span className="hidden sm:inline-flex self-start text-[10px] text-indigo-300/50 bg-indigo-500/8 border border-indigo-500/15 rounded-full px-2 py-0.5">
-                  {totalCount.toLocaleString('es-ES')} juegos
+            <div className="shrink-0 flex flex-col gap-0.5 group cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
+              <h1 className="font-display font-black text-2xl tracking-widest uppercase flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
                 </span>
-              )}
+                <span className="text-gradient">Game</span>Scope
+              </h1>
             </div>
 
             {/* Auth */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-3 shrink-0">
               {userEmail ? (
                 <>
                   {likes.length > 0 && (
-                    <span className="hidden sm:flex items-center gap-1.5 text-xs text-red-400/80 bg-red-500/8 border border-red-500/15 rounded-full px-2.5 py-1">
-                      <span>♥</span> {likes.length}
+                    <span className="hidden sm:flex items-center gap-1.5 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-full px-3 py-1.5 font-medium shadow-sm">
+                      <span className="animate-pulse">♥</span> {likes.length}
                     </span>
                   )}
-                  <span className="text-xs text-white/30 hidden md:block max-w-[140px] truncate">{userEmail}</span>
+                  <span className="text-sm text-white/50 hidden md:block max-w-[140px] truncate">{userEmail}</span>
                   <button
                     onClick={handleSignOut}
-                    className="text-xs text-white/40 hover:text-white/70 px-3 py-1.5 rounded-lg border border-white/8 hover:border-white/20 transition-[color,border-color] duration-150 active:scale-[0.97]"
-                    style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
+                    className="text-xs text-white/60 hover:text-white px-4 py-2 rounded-full border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all duration-300 active:scale-95"
                   >
                     Salir
                   </button>
@@ -219,8 +250,7 @@ export default function GamesGrid() {
               ) : (
                 <button
                   onClick={() => setShowAuth(true)}
-                  className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-indigo-500/20 transition-[transform,background-color,box-shadow] duration-150 active:scale-[0.97]"
-                  style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
+                  className="text-sm font-bold bg-white text-black hover:bg-indigo-50 px-5 py-2 rounded-full shadow-xl shadow-white/10 transition-all duration-300 active:scale-95"
                 >
                   Iniciar sesión
                 </button>
@@ -228,28 +258,28 @@ export default function GamesGrid() {
             </div>
           </div>
 
-          {/* Filters — scrollable horitzontal a mòbil */}
-          <div className="relative">
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#080810] to-transparent z-10 sm:hidden" />
+          {/* Filters */}
+          <div className="relative pb-4">
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#05050A] to-transparent z-10 sm:hidden" />
             <div
-              className="flex gap-2 pb-4 overflow-x-auto"
+              className="flex gap-3 overflow-x-auto pb-2 scroll-smooth"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               <div className="card-enter shrink-0" style={{ animationDelay: '0ms' }}>
                 <Select value={platform} onChange={applyFilter(setPlatform)}>
-                  <option value="">Todas las plataformas</option>
+                  <option value="">Plataformas</option>
                   {platforms.map((p) => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
                 </Select>
               </div>
               <div className="card-enter shrink-0" style={{ animationDelay: '50ms' }}>
                 <Select value={genre} onChange={applyFilter(setGenre)}>
-                  <option value="">Todos los géneros</option>
+                  <option value="">Géneros</option>
                   {genres.map((g) => <option key={g.id} value={String(g.id)}>{g.name}</option>)}
                 </Select>
               </div>
               <div className="card-enter shrink-0" style={{ animationDelay: '100ms' }}>
                 <Select value={year} onChange={applyFilter(setYear)}>
-                  <option value="">Todos los años</option>
+                  <option value="">Año</option>
                   {YEARS.map((y) => <option key={y} value={String(y)}>{y}</option>)}
                 </Select>
               </div>
@@ -263,90 +293,161 @@ export default function GamesGrid() {
         </div>
       </header>
 
-      {/* Main */}
-      <main ref={mainRef} className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main Content */}
+      <main ref={mainRef} className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10">
 
-        <NewReleasesBanner />
+        {/* Hero Section */}
+        {page === 1 && <NewReleasesBanner />}
+
+        {/* News Section */}
+        {page === 1 && !platform && !genre && !year && <NewsSection />}
+
+        {/* Section Header */}
+        <div className="flex items-end justify-between mb-6 mt-8">
+          <div>
+            <h2 className="text-2xl font-display font-bold text-white mb-1">
+              Catálogo de Juegos
+            </h2>
+            <p className="text-white/50 text-sm">
+              {totalCount > 0 ? `Explorando ${totalCount.toLocaleString('es-ES')} resultados` : 'Buscando resultados...'}
+            </p>
+          </div>
+        </div>
 
         {error && (
-          <div className="p-4 bg-red-500/8 border border-red-500/15 rounded-xl text-red-400 text-sm mb-6">
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm mb-8 flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
             {error}
           </div>
         )}
 
-        {/* Skeleton grid — poster format */}
+        {/* Grid */}
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-              <div key={i} className="rounded-xl overflow-hidden bg-[#0c0c18] border border-white/5 aspect-[3/4]">
-                <div className="skeleton w-full h-full" />
+          page === 1 ? (
+            <>
+              <div className="grid grid-cols-3 lg:grid-cols-3 lg:grid-rows-3 gap-4 mb-4">
+                <div className="col-span-3 lg:col-span-2 lg:row-span-3 rounded-2xl overflow-hidden skeleton aspect-[4/5] lg:aspect-auto" />
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="rounded-2xl overflow-hidden skeleton aspect-[16/10] lg:aspect-auto" />
+                ))}
               </div>
-            ))}
-          </div>
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {Array.from({ length: PAGE_SIZE - 4 }).map((_, i) => (
+                  <div key={i} className="rounded-2xl overflow-hidden skeleton aspect-[3/4]" />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                <div key={i} className="rounded-2xl overflow-hidden skeleton aspect-[3/4]" />
+              ))}
+            </div>
+          )
         ) : (
-          /* Game grid — poster format, 2 cols mobile */
-          <div key={gridKey} className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {games.map((g, i) => (
-              <GameCard
-                key={g.id}
-                game={g}
-                index={i}
-                isLiked={likedIds.has(g.id)}
-                loggedIn={!!userEmail}
-                onToggleLike={handleToggleLike}
-                onNeedAuth={() => setShowAuth(true)}
-              />
-            ))}
+          <div key={gridKey}>
+            {/* Bento — only on page 1 with >=4 games */}
+            {page === 1 && games.length >= 4 && (
+              <div className="grid grid-cols-3 lg:grid-cols-3 lg:grid-rows-3 gap-4 mb-4">
+                <div className="col-span-3 lg:col-span-2 lg:row-span-3">
+                  <GameCard
+                    game={games[0]}
+                    index={0}
+                    variant="hero"
+                    isLiked={likedIds.has(games[0].id)}
+                    loggedIn={!!userEmail}
+                    onToggleLike={handleToggleLike}
+                    onNeedAuth={() => setShowAuth(true)}
+                  />
+                </div>
+                {games.slice(1, 4).map((g, i) => (
+                  <GameCard
+                    key={g.id}
+                    game={g}
+                    index={i + 1}
+                    variant="compact"
+                    isLiked={likedIds.has(g.id)}
+                    loggedIn={!!userEmail}
+                    onToggleLike={handleToggleLike}
+                    onNeedAuth={() => setShowAuth(true)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Regular grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {(page === 1 && games.length >= 4 ? games.slice(4) : games).map((g, i) => (
+                <GameCard
+                  key={g.id}
+                  game={g}
+                  index={page === 1 && games.length >= 4 ? i + 4 : i}
+                  isLiked={likedIds.has(g.id)}
+                  loggedIn={!!userEmail}
+                  onToggleLike={handleToggleLike}
+                  onNeedAuth={() => setShowAuth(true)}
+                />
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Pagination */}
+        {/* Modern Pagination */}
         {!loading && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-1.5 mt-12">
-            <button
-              onClick={() => changePage(Math.max(1, page - 1))}
-              disabled={page === 1}
-              className="px-4 py-2 rounded-xl bg-white/5 border border-white/8 text-white/60 text-sm hover:bg-white/8 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-[transform,background-color,color,opacity] duration-150 active:scale-[0.97]"
-              style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
-            >
-              ←
-            </button>
+          <div className="flex flex-col items-center mt-16 mb-8">
+            <div className="flex items-center gap-2 bg-[#0c0c18]/80 backdrop-blur-xl p-2 rounded-full border border-white/5 shadow-2xl">
+              <button
+                onClick={() => changePage(Math.max(1, page - 1))}
+                disabled={page === 1}
+                className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+              >
+                &larr;
+              </button>
 
-            {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
-              const p = page <= 4 ? i + 1 : page >= totalPages - 3 ? totalPages - 6 + i : page - 3 + i
-              if (p < 1 || p > totalPages) return null
-              return (
-                <button
-                  key={p}
-                  onClick={() => changePage(p)}
-                  className={`w-9 h-9 rounded-xl text-sm font-medium transition-[transform,background-color,color] duration-150 active:scale-[0.95] ${
-                    p === page
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                      : 'bg-white/5 border border-white/8 text-white/50 hover:bg-white/8 hover:text-white'
-                  }`}
-                  style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
-                >
-                  {p}
-                </button>
-              )
-            })}
+              <div className="flex gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let p = page;
+                  if (page <= 3) {
+                    p = i + 1;
+                  } else if (page >= totalPages - 2) {
+                    p = totalPages - 4 + i;
+                  } else {
+                    p = page - 2 + i;
+                  }
+                  
+                  if (p < 1 || p > totalPages) return null;
+                  
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => changePage(p)}
+                      className={`w-10 h-10 rounded-full text-sm font-semibold transition-all duration-300 ${
+                        p === page
+                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/40'
+                          : 'text-white/60 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  )
+                })}
+              </div>
 
-            <button
-              onClick={() => changePage(Math.min(totalPages, page + 1))}
-              disabled={page === totalPages}
-              className="px-4 py-2 rounded-xl bg-white/5 border border-white/8 text-white/60 text-sm hover:bg-white/8 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-[transform,background-color,color,opacity] duration-150 active:scale-[0.97]"
-              style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
-            >
-              →
-            </button>
+              <button
+                onClick={() => changePage(Math.min(totalPages, page + 1))}
+                disabled={page === totalPages}
+                className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+              >
+                &rarr;
+              </button>
+            </div>
+            
+            <p className="text-center text-xs font-medium text-white/30 mt-4 tracking-widest uppercase">
+              Página {page} de {totalPages.toLocaleString('es-ES')}
+            </p>
           </div>
-        )}
-
-        {/* Pagination info */}
-        {!loading && totalPages > 1 && (
-          <p className="text-center text-xs text-white/20 mt-4">
-            Página {page} de {totalPages.toLocaleString('es-ES')}
-          </p>
         )}
       </main>
     </div>
