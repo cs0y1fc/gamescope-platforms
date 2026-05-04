@@ -80,6 +80,7 @@ export default function GamesGrid() {
     const params = new URLSearchParams(window.location.search)
     const err = params.get('auth_error')
     if (err) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAuthError(err)
       setShowAuth(true)
       params.delete('auth_error')
@@ -102,6 +103,7 @@ export default function GamesGrid() {
 
   // Likes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!userEmail) { setLikes([]); return }
     fetch('/api/likes').then(r => r.json()).then(data => {
       if (Array.isArray(data)) setLikes(data)
@@ -327,20 +329,20 @@ export default function GamesGrid() {
         {loading ? (
           page === 1 ? (
             <>
-              <div className="grid grid-cols-3 lg:grid-cols-3 lg:grid-rows-3 gap-4 mb-4">
-                <div className="col-span-3 lg:col-span-2 lg:row-span-3 rounded-2xl overflow-hidden skeleton aspect-[4/5] lg:aspect-auto" />
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl overflow-hidden skeleton aspect-[16/10] lg:aspect-auto" />
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 lg:grid-rows-3 gap-3 mb-4">
+                <div className="col-span-3 md:col-span-4 lg:col-span-3 lg:row-span-3 rounded-2xl overflow-hidden skeleton aspect-[4/5] lg:aspect-auto" />
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="rounded-2xl overflow-hidden skeleton aspect-[16/10] lg:aspect-auto hidden lg:block" />
                 ))}
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {Array.from({ length: PAGE_SIZE - 4 }).map((_, i) => (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                {Array.from({ length: PAGE_SIZE - 3 }).map((_, i) => (
                   <div key={i} className="rounded-2xl overflow-hidden skeleton aspect-[3/4]" />
                 ))}
               </div>
             </>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {Array.from({ length: PAGE_SIZE }).map((_, i) => (
                 <div key={i} className="rounded-2xl overflow-hidden skeleton aspect-[3/4]" />
               ))}
@@ -350,8 +352,8 @@ export default function GamesGrid() {
           <div key={gridKey}>
             {/* Bento — only on page 1 with >=4 games */}
             {page === 1 && games.length >= 4 && (
-              <div className="grid grid-cols-3 lg:grid-cols-3 lg:grid-rows-3 gap-4 mb-4">
-                <div className="col-span-3 lg:col-span-2 lg:row-span-3">
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 lg:grid-rows-2 gap-3 mb-4">
+                <div className="col-span-3 md:col-span-4 lg:col-span-3 lg:row-span-2">
                   <GameCard
                     game={games[0]}
                     index={0}
@@ -362,28 +364,29 @@ export default function GamesGrid() {
                     onNeedAuth={() => setShowAuth(true)}
                   />
                 </div>
-                {games.slice(1, 4).map((g, i) => (
-                  <GameCard
-                    key={g.id}
-                    game={g}
-                    index={i + 1}
-                    variant="compact"
-                    isLiked={likedIds.has(g.id)}
-                    loggedIn={!!userEmail}
-                    onToggleLike={handleToggleLike}
-                    onNeedAuth={() => setShowAuth(true)}
-                  />
+                {games.slice(1, 3).map((g, i) => (
+                  <div key={g.id} className="hidden lg:block">
+                    <GameCard
+                      game={g}
+                      index={i + 1}
+                      variant="compact"
+                      isLiked={likedIds.has(g.id)}
+                      loggedIn={!!userEmail}
+                      onToggleLike={handleToggleLike}
+                      onNeedAuth={() => setShowAuth(true)}
+                    />
+                  </div>
                 ))}
               </div>
             )}
 
             {/* Regular grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {(page === 1 && games.length >= 4 ? games.slice(4) : games).map((g, i) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+              {(page === 1 && games.length >= 3 ? games.slice(3) : games).map((g, i) => (
                 <GameCard
                   key={g.id}
                   game={g}
-                  index={page === 1 && games.length >= 4 ? i + 4 : i}
+                  index={page === 1 && games.length >= 3 ? i + 3 : i}
                   isLiked={likedIds.has(g.id)}
                   loggedIn={!!userEmail}
                   onToggleLike={handleToggleLike}
