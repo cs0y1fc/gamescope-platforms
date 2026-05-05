@@ -71,27 +71,27 @@ export default function AuthModal({ onClose, onAuth, initialError }: Props) {
       onClick={(e) => e.target === e.currentTarget && close()}
     >
       <div
-        className="w-full max-w-sm rounded-2xl glass-panel shadow-2xl shadow-black/60"
+        className="w-full max-w-sm rounded-2xl glass-panel shadow-xl shadow-slate-200/50"
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? 'scale(1) translateY(0)' : 'scale(0.96) translateY(8px)',
           transition: 'opacity 200ms cubic-bezier(0.23,1,0.32,1), transform 200ms cubic-bezier(0.23,1,0.32,1)',
-          boxShadow: visible ? '0 0 0 1px rgba(99,102,241,0.12), 0 32px 64px rgba(0,0,0,0.7)' : undefined,
+          boxShadow: visible ? '0 0 0 1px rgba(99,102,241,0.12), 0 32px 64px rgba(0,0,0,0.1)' : undefined,
         }}
       >
         <div className="p-6">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h2 className="text-white font-bold text-lg">
+              <h2 className="text-slate-900 font-bold text-lg">
                 {mode === 'signin' ? 'Bienvenido de vuelta' : 'Crear cuenta'}
               </h2>
-              <p className="text-white/40 text-sm mt-0.5">
+              <p className="text-slate-500 text-sm mt-0.5">
                 {mode === 'signin' ? 'Inicia sesión para guardar tus likes' : 'Empieza a coleccionar juegos'}
               </p>
             </div>
             <button
               onClick={close}
-              className="text-white/30 hover:text-white/60 transition-colors duration-150 active:scale-95 text-xl leading-none mt-1"
+              className="text-slate-400 hover:text-slate-700 transition-colors duration-150 active:scale-95 text-xl leading-none mt-1"
               style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
             >
               ×
@@ -103,7 +103,7 @@ export default function AuthModal({ onClose, onAuth, initialError }: Props) {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-2.5 rounded-xl text-sm transition-[transform,background-color,opacity] duration-150 active:scale-[0.98] disabled:opacity-50 mb-4"
+            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-semibold py-2.5 rounded-xl text-sm transition-[transform,background-color,opacity] duration-150 active:scale-[0.98] disabled:opacity-50 mb-4 shadow-sm"
             style={{ transitionTimingFunction: 'cubic-bezier(0.23,1,0.32,1)' }}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -117,34 +117,34 @@ export default function AuthModal({ onClose, onAuth, initialError }: Props) {
 
           {/* Separator */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px bg-white/8" />
-            <span className="text-white/25 text-xs">o</span>
-            <div className="flex-1 h-px bg-white/8" />
+            <div className="flex-1 h-px bg-slate-200" />
+            <span className="text-slate-400 text-xs">o</span>
+            <div className="flex-1 h-px bg-slate-200" />
           </div>
 
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-white/50">Email</label>
+              <label className="block text-xs font-medium text-slate-600">Email</label>
               <input
                 ref={emailRef}
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-indigo-500/60 focus:bg-white/8 transition-[border-color,background] duration-150"
+                className="w-full bg-white/50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-500/60 focus:bg-white transition-[border-color,background] duration-150 shadow-sm"
                 placeholder="tu@email.com"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-white/50">Contraseña</label>
+              <label className="block text-xs font-medium text-slate-600">Contraseña</label>
               <input
                 type="password"
                 required
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-indigo-500/60 focus:bg-white/8 transition-[border-color,background] duration-150"
+                className="w-full bg-white/50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-500/60 focus:bg-white transition-[border-color,background] duration-150 shadow-sm"
                 placeholder="Mínimo 6 caracteres"
               />
             </div>
@@ -175,7 +175,7 @@ export default function AuthModal({ onClose, onAuth, initialError }: Props) {
             </button>
           </form>
 
-          <p className="text-center text-xs text-white/30 mt-5">
+          <p className="text-center text-xs text-slate-500 mt-5">
             {mode === 'signin' ? '¿Sin cuenta?' : '¿Ya tienes cuenta?'}{' '}
             <button
               onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(null); setInfo(null) }}

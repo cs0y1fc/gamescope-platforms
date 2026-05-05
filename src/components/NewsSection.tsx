@@ -43,7 +43,7 @@ export default function NewsSection() {
               <path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z" />
             </svg>
           </div>
-          <h2 className="text-xl font-display font-bold text-white tracking-wide">
+          <h2 className="text-xl font-display font-bold text-slate-900 tracking-wide">
             Últimas <span className="text-gradient">Noticias</span>
           </h2>
         </div>
@@ -67,36 +67,36 @@ export default function NewsSection() {
               style={{ animationDelay: `${i * 100}ms` }}
             >
               {/* Background Image */}
-              <div className="absolute inset-0 bg-[#0a0a10]">
+              <div className="absolute inset-0 bg-white">
                 <Image
                   src={item.imageUrl}
                   alt={item.title}
                   fill
-                  className="object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
+                  className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 />
               </div>
 
               {/* Gradients */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
               
               {/* Content */}
               <div className="absolute inset-0 p-5 flex flex-col justify-end">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white/90 bg-indigo-600/80 backdrop-blur-md rounded-md">
+                  <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white bg-indigo-600 backdrop-blur-md rounded-md">
                     {item.category}
                   </span>
-                  <span className="text-xs text-white/60 font-medium drop-shadow-md">
+                  <span className="text-xs text-slate-500 font-medium">
                     {formatDate(item.date)}
                   </span>
                 </div>
                 
-                <h3 className="text-lg font-display font-bold text-white mb-2 line-clamp-2 leading-tight group-hover:text-indigo-200 transition-colors duration-300 drop-shadow-lg">
+                <h3 className="text-lg font-display font-bold text-slate-900 mb-2 line-clamp-2 leading-tight group-hover:text-indigo-600 transition-colors duration-300 drop-shadow-sm">
                   {item.title}
                 </h3>
                 
                 <div className="overflow-hidden h-0 group-hover:h-12 transition-all duration-300 ease-out">
-                  <p className="text-sm text-white/70 line-clamp-2 drop-shadow-md">
+                  <p className="text-sm text-slate-600 line-clamp-2">
                     {item.excerpt}
                   </p>
                 </div>

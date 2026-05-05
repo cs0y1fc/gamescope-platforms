@@ -10,7 +10,7 @@ type Props = {
 
 export default function PlatformCard({ platform, isFavorite, onToggleFavorite }: Props) {
   return (
-    <div className="relative rounded-xl overflow-hidden border border-gray-800 bg-gray-900 hover:border-gray-600 transition-colors group">
+    <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm hover:border-indigo-200 hover:shadow-md transition-all group">
       {platform.image_url && (
         <div
           className="h-32 bg-cover bg-center opacity-40 group-hover:opacity-60 transition-opacity"
@@ -20,8 +20,8 @@ export default function PlatformCard({ platform, isFavorite, onToggleFavorite }:
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h3 className="font-semibold text-gray-100">{platform.name}</h3>
-            <p className="text-xs text-gray-500 mt-0.5">{platform.games_count.toLocaleString()} juegos</p>
+            <h3 className="font-semibold text-slate-900">{platform.name}</h3>
+            <p className="text-xs text-slate-500 mt-0.5">{platform.games_count.toLocaleString()} juegos</p>
           </div>
           <button
             onClick={() => onToggleFavorite(platform)}
@@ -38,12 +38,12 @@ export default function PlatformCard({ platform, isFavorite, onToggleFavorite }:
           </button>
         </div>
         {(platform.year_start || platform.year_end) && (
-          <p className="text-xs text-gray-600 mt-2">
+          <p className="text-xs text-slate-400 mt-2">
             {platform.year_start ?? '?'} — {platform.year_end ?? 'presente'}
           </p>
         )}
         {platform.source === 'database' && (
-          <span className="mt-2 inline-block text-[10px] text-gray-700">cached</span>
+          <span className="mt-2 inline-block text-[10px] text-slate-400">cached</span>
         )}
       </div>
     </div>

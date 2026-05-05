@@ -101,12 +101,12 @@ export default function PlatformsGrid() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 font-[family-name:var(--font-geist-sans)]">
-      <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-10">
+    <div className="min-h-screen bg-slate-50 font-[family-name:var(--font-geist-sans)]">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-white">GameScope</h1>
-            <p className="text-xs text-gray-500">Plataformas de videojuegos</p>
+            <h1 className="text-xl font-bold text-slate-900">GameScope</h1>
+            <p className="text-xs text-slate-500">Plataformas de videojuegos</p>
           </div>
           {hello && (
             <span className="text-xs bg-green-500/10 text-green-400 border border-green-500/20 rounded-full px-3 py-1">
@@ -119,21 +119,21 @@ export default function PlatformsGrid() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Status bar */}
         <div className="flex flex-wrap gap-3 mb-6">
-          <div className="flex items-center gap-2 bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-sm">
+          <div className="flex items-center gap-2 bg-white border border-slate-200 shadow-sm rounded-lg px-4 py-2 text-sm">
             <span className={`w-2 h-2 rounded-full ${dataSource === 'database' ? 'bg-green-500' : 'bg-blue-500 animate-pulse'}`} />
-            <span className="text-gray-400">{dataSource === 'database' ? 'BD' : 'RAWG'}</span>
-            <span className="text-white font-medium">{platforms.length} plataformas</span>
+            <span className="text-slate-500">{dataSource === 'database' ? 'BD' : 'RAWG'}</span>
+            <span className="text-slate-900 font-medium">{platforms.length} plataformas</span>
           </div>
 
           {syncStatus?.configured && (
-            <div className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-sm">
+            <div className="flex items-center gap-3 bg-white border border-slate-200 shadow-sm rounded-lg px-4 py-2 text-sm">
               <span className={`w-2 h-2 rounded-full ${syncStatus.needsSync ? 'bg-yellow-500' : 'bg-green-500'}`} />
-              <span className="text-gray-400">Último sync</span>
-              <span className="text-white font-medium">{formatSyncTime(syncStatus.lastSyncedAt)}</span>
+              <span className="text-slate-500">Último sync</span>
+              <span className="text-slate-900 font-medium">{formatSyncTime(syncStatus.lastSyncedAt)}</span>
               <button
                 onClick={triggerSync}
                 disabled={syncing}
-                className="ml-1 text-xs text-indigo-400 hover:text-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="ml-1 text-xs text-indigo-600 hover:text-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {syncing ? 'Sincronizando…' : syncStatus.needsSync ? 'Sincronizar ahora' : 'Forzar sync'}
               </button>
@@ -141,10 +141,10 @@ export default function PlatformsGrid() {
           )}
 
           {supabaseReady && (
-            <div className="flex items-center gap-2 bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-sm">
+            <div className="flex items-center gap-2 bg-white border border-slate-200 shadow-sm rounded-lg px-4 py-2 text-sm">
               <span className="w-2 h-2 rounded-full bg-yellow-400" />
-              <span className="text-gray-400">Favoritas</span>
-              <span className="text-white font-medium">{favorites.length}</span>
+              <span className="text-slate-500">Favoritas</span>
+              <span className="text-slate-900 font-medium">{favorites.length}</span>
             </div>
           )}
         </div>
@@ -183,11 +183,11 @@ export default function PlatformsGrid() {
         {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="rounded-xl border border-gray-800 bg-gray-900 animate-pulse">
-                <div className="h-32 bg-gray-800" />
+              <div key={i} className="rounded-xl border border-slate-200 bg-white shadow-sm skeleton">
+                <div className="h-32 opacity-20" />
                 <div className="p-4 space-y-2">
-                  <div className="h-4 bg-gray-800 rounded w-2/3" />
-                  <div className="h-3 bg-gray-800 rounded w-1/3" />
+                  <div className="h-4 bg-slate-200 rounded w-2/3" />
+                  <div className="h-3 bg-slate-200 rounded w-1/3" />
                 </div>
               </div>
             ))}
@@ -204,9 +204,9 @@ export default function PlatformsGrid() {
           <>
             {favorites.length > 0 && supabaseReady && (
               <section className="mb-10">
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   Favoritas
-                  <span className="text-sm font-normal text-yellow-400">({favorites.length})</span>
+                  <span className="text-sm font-normal text-yellow-500">({favorites.length})</span>
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {platforms
@@ -219,7 +219,7 @@ export default function PlatformsGrid() {
             )}
 
             <section>
-              <h2 className="text-lg font-semibold text-white mb-4">Todas las plataformas</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Todas las plataformas</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {platforms.map((p) => (
                   <PlatformCard

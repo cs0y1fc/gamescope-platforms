@@ -84,8 +84,8 @@ export default function NewReleasesBanner() {
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/60 to-transparent opacity-95" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#030305]/80 via-transparent to-transparent opacity-80" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent opacity-95" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-transparent to-transparent opacity-80" />
 
                   <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-5 lg:p-6">
                     <div className="flex items-center gap-2 mb-2">
@@ -97,17 +97,17 @@ export default function NewReleasesBanner() {
                         Nuevo
                       </span>
                     </div>
-                    <h3 className="text-lg sm:text-xl lg:text-2xl font-display font-bold text-white mb-2 leading-tight drop-shadow-2xl line-clamp-2">
+                    <h3 className="text-lg sm:text-xl lg:text-2xl font-display font-bold text-slate-900 mb-2 leading-tight line-clamp-2">
                       {game.name}
                     </h3>
                     <div className="flex flex-wrap items-center gap-2">
                       {game.released && (
-                        <span className="px-2 py-0.5 bg-white/10 backdrop-blur-md rounded-full text-[11px] font-medium text-white border border-white/10">
+                        <span className="px-2 py-0.5 bg-slate-100/80 backdrop-blur-md rounded-full text-[11px] font-medium text-slate-700 border border-slate-200">
                           {formatDate(game.released)}
                         </span>
                       )}
                       {game.genres.slice(0, 2).map(g => (
-                        <span key={g.id} className="text-[11px] font-medium text-white/60">
+                        <span key={g.id} className="text-[11px] font-medium text-slate-500">
                           {g.name}
                         </span>
                       ))}
@@ -143,7 +143,7 @@ export default function NewReleasesBanner() {
                 key={i}
                 onClick={() => setActiveIndex(i)}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === activeIndex ? 'w-8 bg-emerald-500' : 'w-2 bg-white/30 hover:bg-white/50'
+                  i === activeIndex ? 'w-8 bg-emerald-500' : 'w-2 bg-slate-300 hover:bg-slate-400'
                 }`}
                 aria-label={`Ir a la página ${i + 1}`}
               />

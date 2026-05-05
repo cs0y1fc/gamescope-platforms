@@ -16,11 +16,11 @@ type Props = {
 }
 
 const FALLBACK_GRADIENTS = [
-  'from-indigo-950 via-violet-950 to-slate-950',
-  'from-slate-900 via-indigo-950 to-zinc-950',
-  'from-violet-950 via-fuchsia-950 to-slate-950',
-  'from-zinc-900 via-slate-800 to-indigo-950',
-  'from-blue-950 via-indigo-950 to-violet-950',
+  'from-indigo-100 via-violet-100 to-slate-100',
+  'from-slate-100 via-indigo-100 to-zinc-100',
+  'from-violet-100 via-fuchsia-100 to-slate-100',
+  'from-zinc-100 via-slate-50 to-indigo-100',
+  'from-blue-100 via-indigo-100 to-violet-100',
 ]
 
 export default function GameCard({
@@ -78,7 +78,7 @@ export default function GameCard({
 
   return (
     <article
-      className={`card-enter ${ringClass} group relative ${aspectClass} rounded-xl overflow-hidden cursor-pointer bg-[#0c0c18]`}
+      className={`card-enter ${ringClass} group relative ${aspectClass} rounded-xl overflow-hidden cursor-pointer bg-white`}
       style={{ animationDelay: `${Math.min(index * 35, 320)}ms` }}
     >
       {/* Full-bleed image */}
@@ -105,14 +105,14 @@ export default function GameCard({
       {/* Cinematic gradient overlay */}
       {isHero ? (
         <>
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/10" />
-          <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
-          <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/10" />
+          <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-white/95 via-white/80 to-transparent" />
+          <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-white/80 to-transparent" />
         </>
       ) : (
         <>
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/10" />
-          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-white/10" />
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-white/95 to-transparent" />
         </>
       )}
 
@@ -129,8 +129,8 @@ export default function GameCard({
             ${likeBtnClass} flex items-center justify-center rounded-full
             transition-[transform,background-color,box-shadow] duration-200 active:scale-90
             ${isLiked
-              ? 'bg-red-500 text-white shadow-md shadow-red-500/50'
-              : 'glass-chip text-white/60 hover:text-white'
+              ? 'bg-rose-500 text-white shadow-md shadow-rose-500/50'
+              : 'bg-white/80 backdrop-blur-md text-slate-400 hover:text-slate-700 border border-slate-200'
             }
           `}
           style={{ transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)' }}
@@ -163,16 +163,16 @@ export default function GameCard({
 
       {/* Bottom content */}
       <div className={`absolute inset-x-0 bottom-0 ${padding} z-10`}>
-        <h3 className={`text-white ${titleClass} drop-shadow-md`}>
+        <h3 className={`text-slate-900 ${titleClass}`}>
           {game.name}
         </h3>
 
         <div className={`flex items-center justify-between ${isHero ? 'mt-1' : ''}`}>
-          <span className={`text-white/50 ${isHero ? 'text-sm' : 'text-[11px]'} tabular-nums`}>
+          <span className={`text-slate-500 ${isHero ? 'text-sm' : 'text-[11px]'} tabular-nums`}>
             {releaseYear ?? '—'}
           </span>
           {game.rating > 0 && (
-            <span className={`text-amber-400/90 ${isHero ? 'text-sm' : 'text-[11px]'} tabular-nums font-medium`}>
+            <span className={`text-amber-500 ${isHero ? 'text-sm' : 'text-[11px]'} tabular-nums font-medium`}>
               ★ {game.rating.toFixed(1)}
             </span>
           )}
@@ -183,7 +183,7 @@ export default function GameCard({
             {game.genres.slice(0, isHero ? 4 : 2).map((g) => (
               <span
                 key={g.id}
-                className={`${isHero ? 'text-[10px] sm:text-xs px-2 py-1' : 'text-[9px] px-1.5 py-0.5'} rounded-md glass-chip text-white/70`}
+                className={`${isHero ? 'text-[10px] sm:text-xs px-2 py-1' : 'text-[9px] px-1.5 py-0.5'} rounded-md bg-slate-100 border border-slate-200 text-slate-600`}
               >
                 {g.name}
               </span>

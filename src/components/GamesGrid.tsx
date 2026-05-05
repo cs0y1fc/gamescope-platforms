@@ -36,7 +36,7 @@ function Select({
       <select
         value={value}
         onChange={onChange}
-        className="appearance-none bg-[#0c0c18]/80 backdrop-blur-xl border border-white/10 hover:border-indigo-500/50 text-white/80 text-sm font-medium rounded-full px-5 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all duration-300 cursor-pointer shadow-lg shadow-black/20"
+        className="appearance-none bg-white/80 backdrop-blur-xl border border-slate-200 hover:border-indigo-500/50 text-slate-700 text-sm font-medium rounded-full px-5 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all duration-300 cursor-pointer shadow-lg shadow-slate-200/50"
       >
         {children}
       </select>
@@ -202,8 +202,8 @@ export default function GamesGrid() {
 
       {/* Background abstract gradients */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[120px]" />
-        <div className="absolute top-[40%] right-[-10%] w-[40%] h-[50%] bg-emerald-500/10 rounded-full blur-[150px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-400/20 rounded-full blur-[120px]" />
+        <div className="absolute top-[40%] right-[-10%] w-[40%] h-[50%] bg-emerald-400/20 rounded-full blur-[150px]" />
       </div>
 
       {/* Auth Modal */}
@@ -216,7 +216,7 @@ export default function GamesGrid() {
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-50 glass-strong border-b border-white/5 shadow-2xl shadow-black/50">
+      <header className="sticky top-0 z-50 glass-strong border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4 py-4 sm:py-5">
 
@@ -241,10 +241,10 @@ export default function GamesGrid() {
                       <span className="animate-pulse">♥</span> {likes.length}
                     </span>
                   )}
-                  <span className="text-sm text-white/50 hidden md:block max-w-[140px] truncate">{userEmail}</span>
+                  <span className="text-sm text-slate-500 hidden md:block max-w-[140px] truncate">{userEmail}</span>
                   <button
                     onClick={handleSignOut}
-                    className="text-xs text-white/60 hover:text-white px-4 py-2 rounded-full border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all duration-300 active:scale-95"
+                    className="text-xs text-slate-600 hover:text-slate-900 px-4 py-2 rounded-full border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all duration-300 active:scale-95"
                   >
                     Salir
                   </button>
@@ -252,7 +252,7 @@ export default function GamesGrid() {
               ) : (
                 <button
                   onClick={() => setShowAuth(true)}
-                  className="text-sm font-bold bg-white text-black hover:bg-indigo-50 px-5 py-2 rounded-full shadow-xl shadow-white/10 transition-all duration-300 active:scale-95"
+                  className="text-sm font-bold bg-indigo-600 text-white hover:bg-indigo-700 px-5 py-2 rounded-full shadow-lg shadow-indigo-600/20 transition-all duration-300 active:scale-95"
                 >
                   Iniciar sesión
                 </button>
@@ -262,7 +262,7 @@ export default function GamesGrid() {
 
           {/* Filters */}
           <div className="relative pb-4">
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#05050A] to-transparent z-10 sm:hidden" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#f8fafc] to-transparent z-10 sm:hidden" />
             <div
               className="flex gap-3 overflow-x-auto pb-2 scroll-smooth"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -307,10 +307,10 @@ export default function GamesGrid() {
         {/* Section Header */}
         <div className="flex items-end justify-between mb-6 mt-8">
           <div>
-            <h2 className="text-2xl font-display font-bold text-white mb-1">
+            <h2 className="text-2xl font-display font-bold text-slate-900 mb-1">
               Catálogo de Juegos
             </h2>
-            <p className="text-white/50 text-sm">
+            <p className="text-slate-500 text-sm">
               {totalCount > 0 ? `Explorando ${totalCount.toLocaleString('es-ES')} resultados` : 'Buscando resultados...'}
             </p>
           </div>
@@ -400,11 +400,11 @@ export default function GamesGrid() {
         {/* Modern Pagination */}
         {!loading && totalPages > 1 && (
           <div className="flex flex-col items-center mt-16 mb-8">
-            <div className="flex items-center gap-2 bg-[#0c0c18]/80 backdrop-blur-xl p-2 rounded-full border border-white/5 shadow-2xl">
+            <div className="flex items-center gap-2 bg-white/80 backdrop-blur-xl p-2 rounded-full border border-slate-200 shadow-lg shadow-slate-200/50">
               <button
                 onClick={() => changePage(Math.max(1, page - 1))}
                 disabled={page === 1}
-                className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                className="w-10 h-10 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
               >
                 &larr;
               </button>
@@ -429,7 +429,7 @@ export default function GamesGrid() {
                       className={`w-10 h-10 rounded-full text-sm font-semibold transition-all duration-300 ${
                         p === page
                           ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/40'
-                          : 'text-white/60 hover:bg-white/10 hover:text-white'
+                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                       }`}
                     >
                       {p}
@@ -441,13 +441,13 @@ export default function GamesGrid() {
               <button
                 onClick={() => changePage(Math.min(totalPages, page + 1))}
                 disabled={page === totalPages}
-                className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                className="w-10 h-10 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
               >
                 &rarr;
               </button>
             </div>
             
-            <p className="text-center text-xs font-medium text-white/30 mt-4 tracking-widest uppercase">
+            <p className="text-center text-xs font-medium text-slate-400 mt-4 tracking-widest uppercase">
               Página {page} de {totalPages.toLocaleString('es-ES')}
             </p>
           </div>

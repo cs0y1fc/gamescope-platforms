@@ -1,0 +1,389 @@
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; }
+  .phones-row {
+    display: flex;
+    gap: 28px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 8px 0 24px;
+  }
+  .phone-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .phone {
+    width: 375px;
+    max-height: 520px;
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 28px;
+    overflow: hidden;
+    background: #080810;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    cursor: pointer;
+  }
+  /* Minimal header */
+  .mini-header {
+    background: rgba(8,8,16,0.95);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 10px 16px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { color: #fff; font-weight: 700; font-size: 16px; }
+  .brand span { color: #818cf8; }
+  .chip-row {
+    display: flex;
+    gap: 6px;
+    padding: 6px 16px 8px;
+    background: rgba(8,8,16,0.95);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .chip {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    color: rgba(255,255,255,0.5);
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+  .chip.on { background: rgba(79,70,229,0.2); border-color: rgba(79,70,229,0.4); color: #a5b4fc; }
+
+  /* Section label */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px 6px;
+  }
+  .dot-ping {
+    width: 7px; height: 7px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(16,185,129,0.2);
+  }
+  .section-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* ---- Option A: snap-scroll ~85% width ---- */
+  .snap-row {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 0 16px 12px;
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+  }
+  .snap-card {
+    flex-shrink: 0;
+    width: 300px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #0f0f1a;
+    border: 1px solid rgba(255,255,255,0.07);
+    scroll-snap-align: start;
+  }
+  .snap-img {
+    height: 160px;
+    position: relative;
+    background: linear-gradient(135deg, #1a1a3e, #2d1b69);
+  }
+  .snap-img-b { background: linear-gradient(135deg, #1a2e1a, #1b4d1b); }
+  .snap-img-c { background: linear-gradient(135deg, #3a1a1a, #4d1b1b); }
+  .snap-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #0f0f1a 0%, transparent 60%);
+  }
+  .snap-date {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    color: rgba(255,255,255,0.6);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+  .snap-info { padding: 10px 12px 12px; }
+  .snap-title { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600; }
+  .snap-genres { color: rgba(255,255,255,0.35); font-size: 11px; margin-top: 3px; }
+  /* Dots indicator */
+  .dots { display: flex; gap: 5px; justify-content: center; padding-bottom: 10px; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+  .dot.active { background: #818cf8; width: 16px; border-radius: 3px; }
+
+  /* ---- Option B: 2 cards visible ---- */
+  .small-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 16px 12px;
+    scrollbar-width: none;
+  }
+  .small-card {
+    flex-shrink: 0;
+    width: 165px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #0f0f1a;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .small-img {
+    height: 100px;
+    position: relative;
+    background: linear-gradient(135deg, #1a1a3e, #2d1b69);
+  }
+  .small-img-b { background: linear-gradient(135deg, #1a2e1a, #1b4d1b); }
+  .small-img-c { background: linear-gradient(135deg, #3a1a1a, #4d1b1b); }
+  .small-img-d { background: linear-gradient(135deg, #1a2a3e, #1b2d4d); }
+  .small-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #0f0f1a 0%, transparent 60%);
+  }
+  .small-date {
+    position: absolute;
+    bottom: 5px;
+    right: 6px;
+    background: rgba(0,0,0,0.6);
+    color: rgba(255,255,255,0.55);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 5px;
+  }
+  .small-info { padding: 7px 8px 9px; }
+  .small-title { color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600; line-height: 1.3; }
+  .small-genres { color: rgba(255,255,255,0.3); font-size: 10px; margin-top: 2px; }
+
+  /* ---- Option C: Featured hero ---- */
+  .hero-card {
+    margin: 0 16px 0;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #0f0f1a;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .hero-img {
+    height: 180px;
+    background: linear-gradient(135deg, #1a1a3e 0%, #2d1b69 50%, #4c1d95 100%);
+    position: relative;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #0f0f1a 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+  }
+  .hero-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(16,185,129,0.2);
+    border: 1px solid rgba(16,185,129,0.4);
+    color: #10b981;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.05em;
+  }
+  .hero-date {
+    position: absolute;
+    bottom: 10px;
+    right: 12px;
+    background: rgba(0,0,0,0.6);
+    color: rgba(255,255,255,0.6);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+  .hero-info { padding: 12px 14px 14px; }
+  .hero-title { color: #fff; font-size: 15px; font-weight: 700; }
+  .hero-genres { color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 3px; }
+  .hero-sub-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 16px 12px;
+    scrollbar-width: none;
+  }
+  .hero-sub-card {
+    flex-shrink: 0;
+    width: 120px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #0f0f1a;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .hero-sub-img {
+    height: 70px;
+    background: linear-gradient(135deg, #1a2e1a, #1b4d1b);
+    position: relative;
+  }
+  .hero-sub-img-b { background: linear-gradient(135deg, #3a1a1a, #4d1b1b); }
+  .hero-sub-img-c { background: linear-gradient(135deg, #1a2a3e, #1b2d4d); }
+  .hero-sub-overlay { position: absolute; inset: 0; background: linear-gradient(to top, #0f0f1a, transparent 70%); }
+  .hero-sub-info { padding: 5px 7px 7px; }
+  .hero-sub-title { color: rgba(255,255,255,0.7); font-size: 10px; font-weight: 600; }
+
+  /* Option labels */
+  .opt-label {
+    text-align: center;
+    max-width: 220px;
+  }
+  .opt-letter { font-size: 22px; font-weight: 700; color: #818cf8; margin-bottom: 6px; }
+  .opt-name { color: rgba(255,255,255,0.8); font-size: 14px; font-weight: 600; }
+  .opt-desc { color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 4px; line-height: 1.4; }
+</style>
+
+<h2>Banner de novedades a mòbil</h2>
+<p class="subtitle">Les targetes actuals de 320px quasi no deixen veure la següent. Quina presentació prefereixes?</p>
+
+<div class="phones-row">
+
+  <!-- Option A: Snap scroll 85% width -->
+  <div class="phone-wrap">
+    <div class="phone" data-choice="a" onclick="toggleSelect(this)">
+      <div class="mini-header">
+        <div class="brand">Game<span>Scope</span></div>
+        <span style="color:rgba(255,255,255,0.3);font-size:12px">Iniciar sessió</span>
+      </div>
+      <div class="chip-row">
+        <div class="chip on">PS5 ✕</div>
+        <div class="chip">Switch</div>
+        <div class="chip">PC</div>
+        <div class="chip">Acció</div>
+        <div class="chip">2024</div>
+      </div>
+      <div class="section-label">
+        <div class="dot-ping"></div>
+        <div class="section-title">Últimes novedades</div>
+      </div>
+      <div class="snap-row">
+        <div class="snap-card">
+          <div class="snap-img"><div class="snap-overlay"></div><div class="snap-date">28 abr</div></div>
+          <div class="snap-info"><div class="snap-title">Astro Bot: Rescue Mission 2</div><div class="snap-genres">Plataformes · Acció</div></div>
+        </div>
+        <div class="snap-card">
+          <div class="snap-img snap-img-b"><div class="snap-overlay"></div><div class="snap-date">22 abr</div></div>
+          <div class="snap-info"><div class="snap-title">Final Fantasy XVII</div><div class="snap-genres">RPG · Aventura</div></div>
+        </div>
+      </div>
+      <div class="dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+    <div class="opt-label">
+      <div class="opt-letter">A</div>
+      <div class="opt-name">Snap scroll ampli</div>
+      <div class="opt-desc">~300px, es veu 1 targeta i la vora de la següent. Com App Store.</div>
+    </div>
+  </div>
+
+  <!-- Option B: 2 cards visible -->
+  <div class="phone-wrap">
+    <div class="phone" data-choice="b" onclick="toggleSelect(this)">
+      <div class="mini-header">
+        <div class="brand">Game<span>Scope</span></div>
+        <span style="color:rgba(255,255,255,0.3);font-size:12px">Iniciar sessió</span>
+      </div>
+      <div class="chip-row">
+        <div class="chip on">PS5 ✕</div>
+        <div class="chip">Switch</div>
+        <div class="chip">PC</div>
+        <div class="chip">Acció</div>
+        <div class="chip">2024</div>
+      </div>
+      <div class="section-label">
+        <div class="dot-ping"></div>
+        <div class="section-title">Últimes novedades</div>
+      </div>
+      <div class="small-row">
+        <div class="small-card">
+          <div class="small-img"><div class="small-overlay"></div><div class="small-date">28 abr</div></div>
+          <div class="small-info"><div class="small-title">Astro Bot 2</div><div class="small-genres">Plataformes</div></div>
+        </div>
+        <div class="small-card">
+          <div class="small-img small-img-b"><div class="small-overlay"></div><div class="small-date">22 abr</div></div>
+          <div class="small-info"><div class="small-title">Final Fantasy XVII</div><div class="small-genres">RPG</div></div>
+        </div>
+        <div class="small-card">
+          <div class="small-img small-img-c"><div class="small-overlay"></div><div class="small-date">15 abr</div></div>
+          <div class="small-info"><div class="small-title">Elden Ring II</div><div class="small-genres">Acció-RPG</div></div>
+        </div>
+        <div class="small-card">
+          <div class="small-img small-img-d"><div class="small-overlay"></div><div class="small-date">10 abr</div></div>
+          <div class="small-info"><div class="small-title">Spider-Man 3</div><div class="small-genres">Acció</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="opt-label">
+      <div class="opt-letter">B</div>
+      <div class="opt-name">2 targetes visibles</div>
+      <div class="opt-desc">~165px cada una. Veus més contingut d'un cop. Recomanat.</div>
+    </div>
+  </div>
+
+  <!-- Option C: Featured hero -->
+  <div class="phone-wrap">
+    <div class="phone" data-choice="c" onclick="toggleSelect(this)">
+      <div class="mini-header">
+        <div class="brand">Game<span>Scope</span></div>
+        <span style="color:rgba(255,255,255,0.3);font-size:12px">Iniciar sessió</span>
+      </div>
+      <div class="chip-row">
+        <div class="chip on">PS5 ✕</div>
+        <div class="chip">Switch</div>
+        <div class="chip">PC</div>
+      </div>
+      <div class="section-label">
+        <div class="dot-ping"></div>
+        <div class="section-title">Últimes novedades</div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-img">
+          <div class="hero-overlay"></div>
+          <div class="hero-badge">NOU</div>
+          <div class="hero-date">28 abr 2026</div>
+        </div>
+        <div class="hero-info">
+          <div class="hero-title">Astro Bot: Rescue Mission 2</div>
+          <div class="hero-genres">Plataformes · Acció · PS5</div>
+        </div>
+      </div>
+      <div class="hero-sub-row">
+        <div class="hero-sub-card">
+          <div class="hero-sub-img"><div class="hero-sub-overlay"></div></div>
+          <div class="hero-sub-info"><div class="hero-sub-title">Final Fantasy XVII</div></div>
+        </div>
+        <div class="hero-sub-card">
+          <div class="hero-sub-img hero-sub-img-b"><div class="hero-sub-overlay"></div></div>
+          <div class="hero-sub-info"><div class="hero-sub-title">Elden Ring II</div></div>
+        </div>
+        <div class="hero-sub-card">
+          <div class="hero-sub-img hero-sub-img-c"><div class="hero-sub-overlay"></div></div>
+          <div class="hero-sub-info"><div class="hero-sub-title">Spider-Man 3</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="opt-label">
+      <div class="opt-letter">C</div>
+      <div class="opt-name">Hero destacat + mini fila</div>
+      <div class="opt-desc">El joc més nou a pantalla completa, la resta com a miniatures.</div>
+    </div>
+  </div>
+
+</div>
