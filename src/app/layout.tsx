@@ -7,7 +7,7 @@ const syne = Syne({ variable: "--font-syne", subsets: ["latin"], weight: ["400",
 
 export const metadata: Metadata = {
   title: "GameScope",
-  description: "Descubre juegos, filtra por plataforma, género y año.",
+  description: "Descubre los mejores juegos: filtra por plataforma, género y año.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
