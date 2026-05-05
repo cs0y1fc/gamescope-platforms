@@ -100,3 +100,23 @@ export async function fetchGenres(): Promise<RawgGenre[]> {
   const data = await res.json()
   return data.results as RawgGenre[]
 }
+
+export async function fetchGameById(id: number) {
+  const res = await fetch(`${RAWG_BASE}/games/${id}?key=${API_KEY}`, {
+    next: { revalidate: 300 }
+  })
+  if (!res.ok) throw new Error(`RAWG error: ${res.status}`)
+  return res.json()
+}
+
+export async function fetchGameBySlug(slug: string) {
+  const res = await fetch(`${RAWG_BASE}/games?key=${API_KEY}&search=${slug}&page_size=1`, {
+    next: { revalidate: 300 }
+  })
+  if (!res.ok) throw new Error(`RAWG error: ${res.status}`)
+  const data = await res.json()
+  if (data.results && data.results.length > 0) {
+    return data.results[0]
+  }
+  throw new Error('Game not found')
+}
