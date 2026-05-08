@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { RawgGame } from '@/lib/rawg'
 import { CornerPathFrame } from '@/components/ui'
 
@@ -89,7 +90,10 @@ export default function NewReleasesBanner() {
                   className="relative h-full shrink-0 px-1.5"
                   style={{ width: `${100 / games.length}%` }}
                 >
-                  <div className="relative h-full w-full overflow-hidden">
+                  <Link
+                    href={`/game/${game.slug}`}
+                    className="relative h-full w-full overflow-hidden block group/card"
+                  >
                     {game.background_image && (
                       <Image
                         src={game.background_image}
@@ -147,7 +151,7 @@ export default function NewReleasesBanner() {
                         ))}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               ))}
             </div>

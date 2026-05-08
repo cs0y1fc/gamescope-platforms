@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Platform } from '@/lib/types'
 import { CornerPathFrame, CardBar } from '@/components/ui'
 
@@ -10,8 +11,14 @@ type Props = {
 }
 
 export default function PlatformCard({ platform, isFavorite, onToggleFavorite }: Props) {
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onToggleFavorite(platform)
+  }
+
   return (
-    <div className="card-retro relative overflow-hidden group">
+    <Link href={`/platforms/${platform.slug}`} className="card-retro relative overflow-hidden group block">
       <CornerPathFrame size={12} />
 
       {platform.image_url && (
@@ -25,7 +32,7 @@ export default function PlatformCard({ platform, isFavorite, onToggleFavorite }:
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h3
-              className="uppercase tracking-wide truncate"
+              className="uppercase tracking-wide truncate group-hover:text-[--color-accent] transition-colors"
               style={{
                 fontFamily: 'var(--font-display)',
                 fontWeight: 700,
@@ -43,7 +50,7 @@ export default function PlatformCard({ platform, isFavorite, onToggleFavorite }:
             </p>
           </div>
           <button
-            onClick={() => onToggleFavorite(platform)}
+            onClick={handleFavoriteClick}
             className="flex-shrink-0 px-2 py-1 transition-colors"
             style={{
               color: isFavorite ? 'var(--color-accent)' : 'var(--color-text-muted)',
@@ -78,14 +85,14 @@ export default function PlatformCard({ platform, isFavorite, onToggleFavorite }:
           <span
             className="text-[10px] uppercase tracking-wider"
             style={{
-              color: isFavorite ? 'var(--color-accent)' : 'var(--color-text-faint)',
+              color: 'var(--color-accent)',
               fontFamily: 'var(--font-mono)',
             }}
           >
-            {isFavorite ? '[SAVED]' : ''}
+            {isFavorite ? '[SAVED]' : '[VIEW →]'}
           </span>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }

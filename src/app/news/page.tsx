@@ -1,17 +1,12 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
-import { CornerPathFrame } from '@/components/ui'
+import Image from 'next/image'
+import Header from '@/components/Header'
+import { CornerPathFrame, CardBar } from '@/components/ui'
+import { NEWS } from '@/lib/news-data'
 
-type NewsItem = {
-  id: number
-  title: string
-  excerpt: string
-  imageUrl: string
-  date: string
-  category: string
+export const metadata = {
+  title: 'TRANSMISSIONS :: GAMESCOPE',
+  description: '// Latest gaming news on RetroNova',
 }
 
 function formatRetroDate(dateStr: string): string {
@@ -23,76 +18,57 @@ function formatRetroDate(dateStr: string): string {
   return `${yy}.${String(day).padStart(3, '0')}`
 }
 
-function picsumFor(index: number): string {
-  return `https://picsum.photos/seed/retronova-news-${index + 1}/800/400`
-}
-
-export default function NewsSection() {
-  const [news, setNews] = useState<NewsItem[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetch('/api/news')
-      .then(res => res.json())
-      .then(data => {
-        setNews(data)
-        setLoading(false)
-      })
-      .catch(console.error)
-  }, [])
-
-  if (!loading && news.length === 0) return null
-
+export default function NewsListPage() {
   return (
-    <section className="mb-12 mt-12">
-      <div className="section-divider">
-        <span>{'// latest transmissions'}</span>
-      </div>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg)' }}>
+      <Header />
 
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2
-            className="text-xl uppercase tracking-widest"
-            style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--color-text)' }}
-          >
-            TRANSMISSIONS
-          </h2>
-          <p
-            className="text-xs mt-1"
-            style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
-          >
-            &gt; INCOMING DATA STREAM
-          </p>
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-4 text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
+          {'> ARCHIVE :: TRANSMISSIONS LOG'}
         </div>
-        <Link href="/news" className="btn-retro text-xs">
-          [VIEW ALL →]
-        </Link>
-      </div>
 
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="skeleton h-72" style={{ border: '1px solid var(--color-border)' }} />
-          ))}
+        <div className="section-divider">
+          <span>{'// transmissions archive'}</span>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {news.map((item, i) => (
+
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <h1
+              className="text-3xl uppercase tracking-widest mb-2"
+              style={{ fontFamily: 'var(--font-display)', fontWeight: 800, color: 'var(--color-text)' }}
+            >
+              TRANSMISSIONS
+            </h1>
+            <p
+              className="text-xs"
+              style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+            >
+              {`> ${NEWS.length} ENTRIES IN ARCHIVE`}
+            </p>
+          </div>
+          <Link href="/" className="btn-retro text-xs">
+            [← BACK HOME]
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {NEWS.map((item, i) => (
             <Link
               key={item.id}
               href={`/news/${item.id}`}
-              className="card-retro group relative h-64 sm:h-72 overflow-hidden cursor-pointer card-enter block"
+              className="card-retro group relative h-72 overflow-hidden cursor-pointer card-enter block"
               style={{ animationDelay: `${i * 100}ms` }}
             >
               <CornerPathFrame size={12} />
 
               <div className="absolute inset-0">
                 <Image
-                  src={picsumFor(i)}
+                  src={item.imageUrl}
                   alt={item.title}
                   fill
                   className="object-cover opacity-30 group-hover:opacity-50 group-hover:scale-105 transition-all duration-700 ease-out"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
               </div>
 
@@ -122,21 +98,13 @@ export default function NewsSection() {
                 <div>
                   <span
                     className="inline-block text-[9px] px-1.5 py-0.5 mb-2 uppercase tracking-widest"
-                    style={{
-                      background: 'var(--color-accent)',
-                      color: '#000',
-                      fontFamily: 'var(--font-mono)',
-                    }}
+                    style={{ background: 'var(--color-accent)', color: '#000', fontFamily: 'var(--font-mono)' }}
                   >
                     [{item.category}]
                   </span>
                   <h3
                     className="text-sm uppercase tracking-wide line-clamp-2 leading-tight mb-1 group-hover:text-[--color-accent] transition-colors"
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontWeight: 700,
-                      color: 'var(--color-text)',
-                    }}
+                    style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--color-text)' }}
                   >
                     {item.title}
                   </h3>
@@ -146,12 +114,20 @@ export default function NewsSection() {
                   >
                     {`// ${item.excerpt}`}
                   </p>
+                  <CardBar className="mt-2" />
+                  <div
+                    className="flex items-center justify-between mt-2 text-[10px] uppercase tracking-wider"
+                    style={{ color: 'var(--color-text-faint)', fontFamily: 'var(--font-mono)' }}
+                  >
+                    <span>{`/${item.author}`}</span>
+                    <span>[{item.readTime} MIN]</span>
+                  </div>
                 </div>
               </div>
             </Link>
           ))}
         </div>
-      )}
-    </section>
+      </main>
+    </div>
   )
 }

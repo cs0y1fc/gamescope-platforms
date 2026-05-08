@@ -71,12 +71,36 @@ export default function Header() {
                 </h1>
               </Link>
               <span
-                className="hidden sm:inline text-xs"
+                className="hidden lg:inline text-xs"
                 style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
               >
                 {'// RETRONOVA EDITION'}
               </span>
             </div>
+
+            <nav className="hidden md:flex items-center gap-5 text-xs uppercase tracking-wider">
+              <Link
+                href="/"
+                className="transition-colors hover:text-[--color-accent]"
+                style={{ color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }}
+              >
+                [GAMES]
+              </Link>
+              <Link
+                href="/platforms"
+                className="transition-colors hover:text-[--color-accent]"
+                style={{ color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }}
+              >
+                [PLATFORMS]
+              </Link>
+              <Link
+                href="/news"
+                className="transition-colors hover:text-[--color-accent]"
+                style={{ color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }}
+              >
+                [TRANSMISSIONS]
+              </Link>
+            </nav>
 
             <div className="flex items-center gap-3 shrink-0">
               {userEmail ? (
