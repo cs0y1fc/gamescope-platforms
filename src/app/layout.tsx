@@ -1,19 +1,36 @@
 import type { Metadata } from "next";
-import { Geist, Syne } from "next/font/google";
+import { Share_Tech_Mono, Orbitron } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const syne = Syne({ variable: "--font-syne", subsets: ["latin"], weight: ["400", "600", "700", "800"] });
+const shareTechMono = Share_Tech_Mono({
+  variable: "--font-share-tech-mono",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});
+
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "GameScope",
-  description: "Descubre los mejores juegos: filtra por plataforma, género y año.",
+  title: "GAMESCOPE :: RETRONOVA EDITION",
+  description: "// Discover games — filter by platform, genre, year. RetroNova UI.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${syne.variable} antialiased`} suppressHydrationWarning>
-      <body className="min-h-screen bg-[#050507] text-[#f0f0f5]" suppressHydrationWarning>{children}</body>
+    <html
+      lang="es"
+      className={`${shareTechMono.variable} ${orbitron.variable} antialiased`}
+      suppressHydrationWarning
+    >
+      <body className="min-h-screen" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }

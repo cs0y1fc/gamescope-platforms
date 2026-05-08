@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Platform } from '@/lib/types'
 import PlatformCard from './PlatformCard'
+import Header from './Header'
 
 type HelloResponse = { message: string; timestamp: string; version: string }
 type FavoriteRow = { id: number; rawg_id: number; name: string; slug: string }
@@ -95,108 +96,157 @@ export default function PlatformsGrid() {
   }
 
   const formatSyncTime = (iso: string | null) => {
-    if (!iso) return 'nunca'
+    if (!iso) return 'NEVER'
     const d = new Date(iso)
-    return d.toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })
+    return d.toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }).toUpperCase()
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-[family-name:var(--font-geist-sans)]">
-      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">GameScope</h1>
-            <p className="text-xs text-slate-500">Plataformas de videojuegos</p>
-          </div>
-          {hello && (
-            <span className="text-xs bg-green-500/10 text-green-400 border border-green-500/20 rounded-full px-3 py-1">
-              {hello.message}
-            </span>
-          )}
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg)' }}>
+      <Header />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        {/* System status */}
+        {hello && (
+          <div
+            className="mb-4 text-xs"
+            style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+          >
+            &gt; {hello.message.toUpperCase()} :: VER {hello.version}
+          </div>
+        )}
+
+        {/* Section divider */}
+        <div className="section-divider">
+          <span>{'// platforms registry'}</span>
+        </div>
+
         {/* Status bar */}
-        <div className="flex flex-wrap gap-3 mb-6">
-          <div className="flex items-center gap-2 bg-white border border-slate-200 shadow-sm rounded-lg px-4 py-2 text-sm">
-            <span className={`w-2 h-2 rounded-full ${dataSource === 'database' ? 'bg-green-500' : 'bg-blue-500 animate-pulse'}`} />
-            <span className="text-slate-500">{dataSource === 'database' ? 'BD' : 'RAWG'}</span>
-            <span className="text-slate-900 font-medium">{platforms.length} plataformas</span>
+        <div
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8 p-4"
+          style={{
+            background: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
+          }}
+        >
+          <div className="flex items-center gap-2 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
+            <span
+              className="w-2 h-2"
+              style={{ background: dataSource === 'database' ? 'var(--color-success)' : 'var(--color-info)' }}
+            />
+            <span style={{ color: 'var(--color-text-muted)' }}>SOURCE::</span>
+            <span style={{ color: 'var(--color-text)' }}>
+              {dataSource === 'database' ? 'CACHE' : 'RAWG'} [{platforms.length}]
+            </span>
           </div>
 
           {syncStatus?.configured && (
-            <div className="flex items-center gap-3 bg-white border border-slate-200 shadow-sm rounded-lg px-4 py-2 text-sm">
-              <span className={`w-2 h-2 rounded-full ${syncStatus.needsSync ? 'bg-yellow-500' : 'bg-green-500'}`} />
-              <span className="text-slate-500">Último sync</span>
-              <span className="text-slate-900 font-medium">{formatSyncTime(syncStatus.lastSyncedAt)}</span>
+            <div className="flex items-center gap-2 text-xs flex-wrap" style={{ fontFamily: 'var(--font-mono)' }}>
+              <span
+                className="w-2 h-2"
+                style={{ background: syncStatus.needsSync ? 'var(--color-warn)' : 'var(--color-success)' }}
+              />
+              <span style={{ color: 'var(--color-text-muted)' }}>LAST_SYNC::</span>
+              <span style={{ color: 'var(--color-text)' }}>{formatSyncTime(syncStatus.lastSyncedAt)}</span>
               <button
                 onClick={triggerSync}
                 disabled={syncing}
-                className="ml-1 text-xs text-indigo-600 hover:text-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="ml-auto disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-mono)' }}
               >
-                {syncing ? 'Sincronizando…' : syncStatus.needsSync ? 'Sincronizar ahora' : 'Forzar sync'}
+                {syncing ? '[SYNCING...]' : syncStatus.needsSync ? '[↻ SYNC NOW]' : '[↻ FORCE]'}
               </button>
             </div>
           )}
 
           {supabaseReady && (
-            <div className="flex items-center gap-2 bg-white border border-slate-200 shadow-sm rounded-lg px-4 py-2 text-sm">
-              <span className="w-2 h-2 rounded-full bg-yellow-400" />
-              <span className="text-slate-500">Favoritas</span>
-              <span className="text-slate-900 font-medium">{favorites.length}</span>
+            <div className="flex items-center gap-2 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
+              <span className="w-2 h-2" style={{ background: 'var(--color-accent)' }} />
+              <span style={{ color: 'var(--color-text-muted)' }}>SAVED::</span>
+              <span style={{ color: 'var(--color-text)' }}>[{String(favorites.length).padStart(3, '0')}]</span>
             </div>
           )}
         </div>
 
-        {/* Warnings */}
         {!supabaseReady && (
-          <div className="mb-6 p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-xl text-sm text-yellow-300">
-            <strong>Supabase no configurado.</strong> Añade{' '}
-            <code className="bg-yellow-500/10 px-1 rounded">NEXT_PUBLIC_SUPABASE_URL</code> y{' '}
-            <code className="bg-yellow-500/10 px-1 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>{' '}
-            en <code className="bg-yellow-500/10 px-1 rounded">.env.local</code> y ejecuta{' '}
-            <code className="bg-yellow-500/10 px-1 rounded">supabase-schema.sql</code>.
+          <div
+            className="mb-6 p-4 text-sm"
+            style={{
+              background: 'rgba(255,214,0,0.05)',
+              border: '1px solid var(--color-warn)',
+              color: 'var(--color-warn)',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            ! WARNING :: SUPABASE NOT CONFIGURED. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local and run supabase-schema.sql.
           </div>
         )}
 
         {syncStatus?.configured && platforms.length === 0 && !loading && !error && (
-          <div className="mb-6 p-6 bg-indigo-500/5 border border-indigo-500/20 rounded-xl text-center">
-            <p className="text-indigo-300 mb-3">La base de datos está vacía. Haz el primer sync para importar las plataformas de RAWG.</p>
+          <div
+            className="mb-6 p-6 text-center"
+            style={{
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-accent)',
+            }}
+          >
+            <p
+              className="mb-4 text-sm"
+              style={{ color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }}
+            >
+              &gt; DATABASE EMPTY. INITIALIZE SYNC TO IMPORT FROM RAWG.
+            </p>
             <button
               onClick={triggerSync}
               disabled={syncing}
-              className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors"
+              className="btn-retro btn-retro-primary text-xs disabled:opacity-50"
             >
-              {syncing ? 'Importando plataformas y descargando imágenes…' : 'Iniciar sync'}
+              {syncing ? '[IMPORTING...]' : '[INITIATE SYNC]'}
             </button>
           </div>
         )}
 
         {syncing && (
-          <div className="mb-6 p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-xl text-sm text-indigo-300 flex items-center gap-3">
-            <span className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-            Descargando datos de RAWG y guardando imágenes en Supabase Storage…
+          <div
+            className="mb-6 p-4 text-sm flex items-center gap-3"
+            style={{
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-accent)',
+              color: 'var(--color-accent)',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            <span
+              className="w-3 h-3 border-2 border-t-transparent rounded-full animate-spin flex-shrink-0"
+              style={{ borderColor: 'var(--color-accent)', borderTopColor: 'transparent' }}
+            />
+            &gt; FETCHING DATA FROM RAWG :: SAVING IMAGES TO LOCAL CACHE...
           </div>
         )}
 
         {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="rounded-xl border border-slate-200 bg-white shadow-sm skeleton">
-                <div className="h-32 opacity-20" />
-                <div className="p-4 space-y-2">
-                  <div className="h-4 bg-slate-200 rounded w-2/3" />
-                  <div className="h-3 bg-slate-200 rounded w-1/3" />
-                </div>
-              </div>
+              <div
+                key={i}
+                className="skeleton"
+                style={{ border: '1px solid var(--color-border)', height: '12rem' }}
+              />
             ))}
           </div>
         )}
 
         {error && (
-          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
-            {error}
+          <div
+            className="p-4 text-sm"
+            style={{
+              background: 'rgba(255,59,59,0.1)',
+              border: '1px solid var(--color-danger)',
+              color: 'var(--color-danger)',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            ! ERROR :: {error}
           </div>
         )}
 
@@ -204,10 +254,9 @@ export default function PlatformsGrid() {
           <>
             {favorites.length > 0 && supabaseReady && (
               <section className="mb-10">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                  Favoritas
-                  <span className="text-sm font-normal text-yellow-500">({favorites.length})</span>
-                </h2>
+                <div className="section-divider">
+                  <span>{`// favorites [${String(favorites.length).padStart(2, '0')}]`}</span>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {platforms
                     .filter((p) => favoriteIds.has(p.id))
@@ -219,7 +268,9 @@ export default function PlatformsGrid() {
             )}
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Todas las plataformas</h2>
+              <div className="section-divider">
+                <span>{`// all platforms [${String(platforms.length).padStart(3, '0')}]`}</span>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {platforms.map((p) => (
                   <PlatformCard

@@ -1,134 +1,202 @@
 @import "tailwindcss";
 
+/* ─── RetroNova Design System ─── */
 :root {
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --color-accent: #6366f1; /* Indigo */
-  --color-accent-glow: rgba(99, 102, 241, 0.2);
-  --color-emerald: #10b981;
+
+  /* Surfaces */
+  --color-bg:          #080808;
+  --color-surface:     #0f0f0f;
+  --color-surface-2:   #141414;
+  --color-border:      #1f1f1f;
+  --color-border-accent: #FF6B00;
+
+  /* Accents */
+  --color-accent:      #FF6B00;
+  --color-accent-dim:  rgba(255, 107, 0, 0.15);
+  --color-accent-glow: rgba(255, 107, 0, 0.35);
+
+  /* Text */
+  --color-text:        #F0EDE6;
+  --color-text-muted:  #6B6560;
+  --color-text-faint:  #3A3835;
+
+  /* Status */
+  --color-success:     #00FF9F;
+  --color-warn:        #FFD600;
+  --color-danger:      #FF3B3B;
+  --color-info:        #00C8FF;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-display: var(--font-syne);
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  --color-surface: var(--color-surface);
+  --color-surface-2: var(--color-surface-2);
+  --color-border-rn: var(--color-border);
+  --color-accent: var(--color-accent);
+  --color-accent-dim: var(--color-accent-dim);
+  --color-text-rn: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-faint: var(--color-text-faint);
+  --color-success: var(--color-success);
+  --color-warn: var(--color-warn);
+  --color-danger: var(--color-danger);
+  --color-info: var(--color-info);
+  --font-mono: var(--font-share-tech-mono), 'Courier New', monospace;
+  --font-display: var(--font-orbitron), sans-serif;
 }
 
 html {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans, Arial, sans-serif);
-}
-
-/* ─── Premium Ambient light background ─── */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(circle at 15% 0%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
-    radial-gradient(circle at 50% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-mono, 'Courier New', monospace);
 }
 
 /* ─── Animations ─── */
 @keyframes fadeUp {
-  0% { opacity: 0; transform: translateY(20px) scale(0.98); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0%   { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 .card-enter {
   opacity: 0;
-  transform: translateY(20px) scale(0.98);
   animation: fadeUp 600ms var(--ease-out) forwards;
 }
 
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+.cursor-blink::after {
+  content: '_';
+  margin-left: 0.25em;
+  animation: blink 1s step-end infinite;
+  color: var(--color-accent);
+}
+
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
+  0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background: linear-gradient(90deg, #0f0f0f 25%, #1a1a1a 50%, #0f0f0f 75%);
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
 }
 
-/* ─── Typography & Gradients ─── */
-.text-gradient {
-  background: linear-gradient(135deg, #4f46e5 20%, #7c3aed 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* ─── RetroNova Card ─── */
+.card-retro {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  position: relative;
+  transition: border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+}
+.card-retro:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 16px var(--color-accent-dim);
 }
 
-.text-gradient-emerald {
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* ─── Scanline overlay (for hero) ─── */
+.scanlines {
+  position: relative;
+}
+.scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 107, 0, 0.02) 2px,
+    rgba(255, 107, 0, 0.02) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
-/* ─── Premium Card Rings & Glows ─── */
-.card-ring {
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.02);
-  transition: all 400ms var(--ease-out);
+/* ─── Terminal inputs ─── */
+.input-terminal {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  padding: 0.5rem 0;
+  outline: none;
+  transition: border-color 200ms var(--ease-out);
+  width: 100%;
 }
-.card-ring:hover {
-  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.3), 0 20px 40px rgba(0, 0, 0, 0.08);
-  transform: translateY(-4px) scale(1.01);
+.input-terminal:focus {
+  border-bottom-color: var(--color-accent);
 }
-
-.card-ring-hero {
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.04);
-  transition: all 500ms var(--ease-out);
-}
-.card-ring-hero:hover {
-  box-shadow:
-    inset 0 0 0 1px rgba(99, 102, 241, 0.4),
-    0 32px 64px rgba(0, 0, 0, 0.1),
-    0 0 100px rgba(99, 102, 241, 0.1);
-  transform: translateY(-2px);
+.input-terminal::placeholder {
+  color: var(--color-text-faint);
+  letter-spacing: 0.05em;
 }
 
-/* ─── Glassmorphism Utilities ─── */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-.glass-strong {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-}
-.glass-chip {
-  background: rgba(0, 0, 0, 0.03);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+/* ─── Bracketed buttons ─── */
+.btn-retro {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
   transition: all 200ms var(--ease-out);
 }
-.glass-chip:hover {
-  background: rgba(0, 0, 0, 0.06);
-  border-color: rgba(0, 0, 0, 0.1);
+.btn-retro:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.btn-retro-primary {
+  background: var(--color-accent);
+  color: #000;
+  border-color: var(--color-accent);
+}
+.btn-retro-primary:hover {
+  background: transparent;
+  color: var(--color-accent);
 }
 
-/* ─── Tooltip instant ─── */
-[data-instant] { transition-duration: 0ms !important; }
+/* ─── Section comment separator ─── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+.section-divider span {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+}
 
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+
+/* ─── Selection ─── */
+::selection { background: var(--color-accent); color: #000; }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import { CornerPathFrame } from '@/components/ui'
 
 type NewsItem = {
   id: number
@@ -12,9 +13,17 @@ type NewsItem = {
   category: string
 }
 
-function formatDate(dateStr: string): string {
+function formatRetroDate(dateStr: string): string {
   const d = new Date(dateStr)
-  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+  const yy = String(d.getFullYear()).slice(-2)
+  const start = new Date(d.getFullYear(), 0, 0)
+  const diff = d.getTime() - start.getTime()
+  const day = Math.floor(diff / (1000 * 60 * 60 * 24))
+  return `${yy}.${String(day).padStart(3, '0')}`
+}
+
+function picsumFor(index: number): string {
+  return `https://picsum.photos/seed/retronova-news-${index + 1}/800/400`
 }
 
 export default function NewsSection() {
@@ -34,28 +43,35 @@ export default function NewsSection() {
   if (!loading && news.length === 0) return null
 
   return (
-    <section className="mb-12">
+    <section className="mb-12 mt-12">
+      <div className="section-divider">
+        <span>{'// latest transmissions'}</span>
+      </div>
+
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clipRule="evenodd" />
-              <path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-display font-bold text-slate-900 tracking-wide">
-            Últimas <span className="text-gradient">Noticias</span>
+        <div>
+          <h2
+            className="text-xl uppercase tracking-widest"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--color-text)' }}
+          >
+            TRANSMISSIONS
           </h2>
+          <p
+            className="text-xs mt-1"
+            style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+          >
+            &gt; INCOMING DATA STREAM
+          </p>
         </div>
-        <button className="text-sm text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
-          Ver todas &rarr;
+        <button className="btn-retro text-xs">
+          [VIEW ALL →]
         </button>
       </div>
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="skeleton h-64 rounded-2xl" />
+            <div key={i} className="skeleton h-72" style={{ border: '1px solid var(--color-border)' }} />
           ))}
         </div>
       ) : (
@@ -63,41 +79,70 @@ export default function NewsSection() {
           {news.map((item, i) => (
             <article
               key={item.id}
-              className="group relative h-64 sm:h-72 lg:h-80 rounded-2xl overflow-hidden card-ring cursor-pointer card-enter"
+              className="card-retro group relative h-64 sm:h-72 overflow-hidden cursor-pointer card-enter"
               style={{ animationDelay: `${i * 100}ms` }}
             >
-              {/* Background Image */}
-              <div className="absolute inset-0 bg-white">
+              <CornerPathFrame size={12} />
+
+              <div className="absolute inset-0">
                 <Image
-                  src={item.imageUrl}
+                  src={picsumFor(i)}
                   alt={item.title}
                   fill
-                  className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
+                  className="object-cover opacity-30 group-hover:opacity-50 group-hover:scale-105 transition-all duration-700 ease-out"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 />
               </div>
 
-              {/* Gradients */}
-              <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
-              
-              {/* Content */}
-              <div className="absolute inset-0 p-5 flex flex-col justify-end">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white bg-indigo-600 backdrop-blur-md rounded-md">
-                    {item.category}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(to top, var(--color-bg) 0%, rgba(8,8,8,0.7) 50%, transparent 100%)`,
+                }}
+              />
+
+              <div className="absolute inset-0 p-4 flex flex-col justify-between z-10">
+                <div className="flex items-start justify-between">
+                  <span
+                    className="text-[10px] tabular-nums"
+                    style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+                  >
+                    [{String(i + 1).padStart(3, '0')}]
                   </span>
-                  <span className="text-xs text-slate-500 font-medium">
-                    {formatDate(item.date)}
+                  <span
+                    className="text-[10px] tabular-nums"
+                    style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-mono)' }}
+                  >
+                    {formatRetroDate(item.date)}
                   </span>
                 </div>
-                
-                <h3 className="text-lg font-display font-bold text-slate-900 mb-2 line-clamp-2 leading-tight group-hover:text-indigo-600 transition-colors duration-300 drop-shadow-sm">
-                  {item.title}
-                </h3>
-                
-                <div className="overflow-hidden h-0 group-hover:h-12 transition-all duration-300 ease-out">
-                  <p className="text-sm text-slate-600 line-clamp-2">
-                    {item.excerpt}
+
+                <div>
+                  <span
+                    className="inline-block text-[9px] px-1.5 py-0.5 mb-2 uppercase tracking-widest"
+                    style={{
+                      background: 'var(--color-accent)',
+                      color: '#000',
+                      fontFamily: 'var(--font-mono)',
+                    }}
+                  >
+                    [{item.category}]
+                  </span>
+                  <h3
+                    className="text-sm uppercase tracking-wide line-clamp-2 leading-tight mb-1 group-hover:text-[--color-accent] transition-colors"
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontWeight: 700,
+                      color: 'var(--color-text)',
+                    }}
+                  >
+                    {item.title}
+                  </h3>
+                  <p
+                    className="text-[11px] line-clamp-2"
+                    style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+                  >
+                    {`// ${item.excerpt}`}
                   </p>
                 </div>
               </div>

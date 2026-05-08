@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
+import { TopLine } from '@/components/ui'
 
 type LikeRow = { rawg_id: number; game_name: string }
 
@@ -18,6 +19,7 @@ export default function Header() {
       if (!session) setLikes([])
     })
     return () => subscription.unsubscribe()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -34,57 +36,82 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 glass-strong border-b border-slate-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-4 py-4 sm:py-5">
-          {/* Brand */}
-          <div className="shrink-0 flex items-center gap-3">
-            <Link href="/" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="group flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </span>
-              <h1 className="font-display font-black text-2xl tracking-widest uppercase">
-                <span className="text-gradient">Game</span>Scope
-              </h1>
-            </Link>
-            <Link href="/" className="hidden sm:flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors ml-2">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7m0 0l7 7m0 0l-2 2m0 0l-7 7m0 0l-7-7" />
-              </svg>
-              Inicio
-            </Link>
-          </div>
-
-          {/* Auth */}
-          <div className="flex items-center gap-3 shrink-0">
-            {userEmail ? (
-              <>
-                {likes.length > 0 && (
-                  <span className="hidden sm:flex items-center gap-1.5 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-full px-3 py-1.5 font-medium shadow-sm">
-                    <span className="animate-pulse">♥</span> {likes.length}
-                  </span>
-                )}
-                <span className="text-sm text-slate-500 hidden md:block max-w-[140px] truncate">{userEmail}</span>
-                <button
-                  onClick={handleSignOut}
-                  className="text-xs text-slate-600 hover:text-slate-900 px-4 py-2 rounded-full border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all duration-300 active:scale-95"
-                >
-                  Salir
-                </button>
-              </>
-            ) : (
-              <a
-                href="/auth/callback?provider=google"
-                className="text-sm font-bold bg-indigo-600 text-white hover:bg-indigo-700 px-5 py-2 rounded-full shadow-lg shadow-indigo-600/20 transition-all duration-300 active:scale-95"
+    <>
+      <TopLine fixed />
+      <header
+        className="sticky top-0 z-40 backdrop-blur-sm"
+        style={{
+          background: 'rgba(8, 8, 8, 0.85)',
+          borderBottom: '1px solid var(--color-border)',
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-4 py-4">
+            <div className="shrink-0 flex items-center gap-4">
+              <Link
+                href="/"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="flex items-center gap-2 group"
               >
-                Iniciar sesión
-              </a>
-            )}
+                <span
+                  className="text-lg"
+                  style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-mono)' }}
+                >
+                  &gt;_
+                </span>
+                <h1
+                  className="text-xl tracking-widest uppercase"
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 800,
+                    color: 'var(--color-text)',
+                  }}
+                >
+                  GAMESCOPE
+                </h1>
+              </Link>
+              <span
+                className="hidden sm:inline text-xs"
+                style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+              >
+                {'// RETRONOVA EDITION'}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              {userEmail ? (
+                <>
+                  {likes.length > 0 && (
+                    <span
+                      className="hidden sm:inline-flex items-center gap-1.5 text-xs px-3 py-1.5"
+                      style={{
+                        color: 'var(--color-accent)',
+                        border: '1px solid var(--color-accent)',
+                        fontFamily: 'var(--font-mono)',
+                      }}
+                    >
+                      [ ♥ {String(likes.length).padStart(2, '0')} ]
+                    </span>
+                  )}
+                  <span
+                    className="hidden md:block max-w-[180px] truncate text-xs"
+                    style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+                  >
+                    {userEmail}
+                  </span>
+                  <button onClick={handleSignOut} className="btn-retro text-xs">
+                    [SIGN OUT]
+                  </button>
+                </>
+              ) : (
+                <a href="/auth/callback?provider=google" className="btn-retro btn-retro-primary text-xs">
+                  [SIGN IN]
+                </a>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   )
 }

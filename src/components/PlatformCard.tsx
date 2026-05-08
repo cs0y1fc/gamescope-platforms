@@ -1,6 +1,7 @@
 'use client'
 
 import { Platform } from '@/lib/types'
+import { CornerPathFrame, CardBar } from '@/components/ui'
 
 type Props = {
   platform: Platform
@@ -10,41 +11,80 @@ type Props = {
 
 export default function PlatformCard({ platform, isFavorite, onToggleFavorite }: Props) {
   return (
-    <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm hover:border-indigo-200 hover:shadow-md transition-all group">
+    <div className="card-retro relative overflow-hidden group">
+      <CornerPathFrame size={12} />
+
       {platform.image_url && (
         <div
-          className="h-32 bg-cover bg-center opacity-40 group-hover:opacity-60 transition-opacity"
+          className="h-32 bg-cover bg-center opacity-30 group-hover:opacity-50 transition-opacity"
           style={{ backgroundImage: `url(${platform.image_url})` }}
         />
       )}
-      <div className="p-4">
+
+      <div className="p-4 relative z-10">
         <div className="flex items-start justify-between gap-2">
-          <div>
-            <h3 className="font-semibold text-slate-900">{platform.name}</h3>
-            <p className="text-xs text-slate-500 mt-0.5">{platform.games_count.toLocaleString()} juegos</p>
+          <div className="min-w-0">
+            <h3
+              className="uppercase tracking-wide truncate"
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontWeight: 700,
+                color: 'var(--color-text)',
+                fontSize: '0.95rem',
+              }}
+            >
+              {platform.name}
+            </h3>
+            <p
+              className="text-xs mt-1"
+              style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+            >
+              {`// ${platform.games_count.toLocaleString()} games`}
+            </p>
           </div>
           <button
             onClick={() => onToggleFavorite(platform)}
-            className={`flex-shrink-0 p-1.5 rounded-lg transition-colors ${
-              isFavorite
-                ? 'text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20'
-                : 'text-gray-500 hover:text-yellow-400 hover:bg-yellow-400/10'
-            }`}
+            className="flex-shrink-0 px-2 py-1 transition-colors"
+            style={{
+              color: isFavorite ? 'var(--color-accent)' : 'var(--color-text-muted)',
+              border: `1px solid ${isFavorite ? 'var(--color-accent)' : 'var(--color-border)'}`,
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.7rem',
+            }}
             title={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
           >
-            <svg className="w-5 h-5" fill={isFavorite ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-            </svg>
+            {isFavorite ? '[★]' : '[☆]'}
           </button>
         </div>
+
         {(platform.year_start || platform.year_end) && (
-          <p className="text-xs text-slate-400 mt-2">
-            {platform.year_start ?? '?'} — {platform.year_end ?? 'presente'}
+          <p
+            className="text-xs mt-3 tabular-nums"
+            style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+          >
+            [{platform.year_start ?? '????'} — {platform.year_end ?? 'PRESENT'}]
           </p>
         )}
-        {platform.source === 'database' && (
-          <span className="mt-2 inline-block text-[10px] text-slate-400">cached</span>
-        )}
+
+        <CardBar className="mt-3 mb-2" />
+
+        <div className="flex items-center justify-between">
+          <span
+            className="text-[10px] uppercase tracking-wider"
+            style={{ color: 'var(--color-text-faint)', fontFamily: 'var(--font-mono)' }}
+          >
+            {platform.source === 'database' ? '[CACHED]' : '[LIVE]'}
+          </span>
+          <span
+            className="text-[10px] uppercase tracking-wider"
+            style={{
+              color: isFavorite ? 'var(--color-accent)' : 'var(--color-text-faint)',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            {isFavorite ? '[SAVED]' : ''}
+          </span>
+        </div>
       </div>
     </div>
   )
